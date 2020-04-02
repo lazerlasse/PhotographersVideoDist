@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotographersVideoDist", "PhotographersVideoDist\PhotographersVideoDist.csproj", "{C4799A98-5BEC-4579-9D99-EB6F33747A3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4799A98-5BEC-4579-9D99-EB6F33747A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4799A98-5BEC-4579-9D99-EB6F33747A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4799A98-5BEC-4579-9D99-EB6F33747A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4799A98-5BEC-4579-9D99-EB6F33747A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C70F0EE-4D31-4474-A3C6-EE35A1B06805}
+	EndGlobalSection
+EndGlobal
