@@ -42,14 +42,14 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
+            [Required, Display(Name = "Brugernavn")]
             public string UserName { get; set; }
 
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Display(Name = "Remember me?")]
+            [Display(Name = "Husk mig?")]
             public bool RememberMe { get; set; }
         }
 

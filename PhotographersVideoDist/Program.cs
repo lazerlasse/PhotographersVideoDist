@@ -29,6 +29,10 @@ namespace PhotographersVideoDist
 				// dotnet user-secrets set SeedUserPW <pw>
 
 				string adminUserPWD = config["SeedUserPW"];
+				string connection = config.GetConnectionString("DefaultConnection");
+
+				// Seed Postal data.
+				SeedDefaultData.SeedData(connection);
 
 				try
 				{

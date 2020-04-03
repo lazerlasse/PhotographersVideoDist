@@ -3,17 +3,15 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PhotographersVideoDist.Data;
 
-namespace PhotographersVideoDist.Data.Migrations
+namespace PhotographersVideoDist.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200402213441_InitialCreateCaseAndPostal")]
-    partial class InitialCreateCaseAndPostal
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,10 +258,8 @@ namespace PhotographersVideoDist.Data.Migrations
             modelBuilder.Entity("PhotographersVideoDist.Models.Postal", b =>
                 {
                     b.Property<int>("PostalCode")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasMaxLength(4)
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasMaxLength(4);
 
                     b.Property<string>("Town")
                         .HasColumnType("nvarchar(max)");

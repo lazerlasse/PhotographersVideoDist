@@ -1,26 +1,39 @@
-﻿using PhotographersVideoDist.Models;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using PhotographersVideoDist.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PhotographersVideoDist.Data
 {
 	public static class SeedDefaultData
 	{
-		public static async Task SeedDatabaseAsync(ApplicationDbContext context)
+		public static void SeedData(string connectionString)
 		{
-			if (context.Postals.Any())
+			var dataFile = "/tmp/CSV/Postnummer-Danmark-BULK-CSV.csv";
+				//Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "SeedData", "Postnummer-Danmark-BULK-CSV.csv");
+			StringBuilder sb = new StringBuilder();
+			sb.AppendFormat(string.Format("BULK INSERT {0}", "Postals"));
+			sb.AppendFormat(string.Format(" FROM '{0}'", dataFile));
+			sb.AppendFormat(string.Format(" WITH ( FORMAT = 'CSV', FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a' );"));
+			string sqlQuery = sb.ToString();
+			using SqlConnection sqlConn = new SqlConnection(connectionString);
+			sqlConn.Open();
+			using SqlCommand sqlCmd = new SqlCommand(sqlQuery, sqlConn);
+
+			try
 			{
-				return;     // Status table are seeded...
+				sqlCmd.ExecuteNonQuery();
+				sqlConn.Close();
 			}
-
-
-			// Create some bulk insert from csv document.
-			var postals = new List<Postal>();
-
-			await context.Postals.AddRangeAsync(postals);
-			await context.SaveChangesAsync();
+			catch (Exception ex)
+			{
+				throw ex;
+			}
 		}
 	}
 }
