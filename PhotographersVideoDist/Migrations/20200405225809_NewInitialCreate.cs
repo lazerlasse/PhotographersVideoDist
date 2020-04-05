@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PhotographersVideoDist.Migrations
@@ -50,7 +51,7 @@ namespace PhotographersVideoDist.Migrations
                 name: "Postals",
                 columns: table => new
                 {
-                    PostalCode = table.Column<int>(maxLength: 4, nullable: false),
+                    PostalCode = table.Column<string>(maxLength: 4, nullable: false),
                     Town = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -63,7 +64,7 @@ namespace PhotographersVideoDist.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -84,7 +85,7 @@ namespace PhotographersVideoDist.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -169,12 +170,12 @@ namespace PhotographersVideoDist.Migrations
                 columns: table => new
                 {
                     CaseID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Titel = table.Column<string>(nullable: false),
                     Details = table.Column<string>(nullable: false),
                     Comments = table.Column<string>(nullable: true),
                     Street = table.Column<string>(nullable: false),
-                    PostalCode = table.Column<int>(nullable: false),
+                    PostalCode = table.Column<string>(nullable: false),
                     Published = table.Column<DateTime>(nullable: false),
                     PhotographerID = table.Column<string>(nullable: true)
                 },
@@ -204,8 +205,7 @@ namespace PhotographersVideoDist.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -231,8 +231,7 @@ namespace PhotographersVideoDist.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cases_PhotographerID",

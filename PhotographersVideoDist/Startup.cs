@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using PhotographersVideoDist.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 
 namespace PhotographersVideoDist
 {
@@ -42,10 +43,15 @@ namespace PhotographersVideoDist
 			});
 
 
+			SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
+			Configuration.GetConnectionString("PVD_db_Connection"))
+			{
+				Password = Configuration["DbPWD"]
+			};
+
 			// Set the dbcontext sql connection settings...
 			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(
-					Configuration.GetConnectionString("DefaultConnection")));
+				options.UseMySql(MySqlconnection.ConnectionString));
 
 
 			// Add identity and roles...

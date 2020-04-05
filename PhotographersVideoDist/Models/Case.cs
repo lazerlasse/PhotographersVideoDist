@@ -29,7 +29,7 @@ namespace PhotographersVideoDist.Models
 
 		// Navigation Properties for Postalcode and Town.
 		[ForeignKey("Postal"), Required]
-		public int PostalCode { get; set; }		// FK For Postal.
+		public string PostalCode { get; set; }		// FK For Postal.
 		public Postal Postal { get; set; }		// Navigation Property For Postal.
 
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,10 +30,14 @@ namespace PhotographersVideoDist
 				// dotnet user-secrets set SeedUserPW <pw>
 
 				string adminUserPWD = config["SeedUserPW"];
-				string connection = config.GetConnectionString("DefaultConnection");
+				SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
+				config.GetConnectionString("PVD_db_Connection"))
+				{
+					Password = config["DbPWD"]
+				};
 
 				// Seed Postal data.
-				SeedDefaultData.SeedData(connection);
+				SeedDefaultData.SeedData(MySqlconnection.ConnectionString, context);
 
 				try
 				{

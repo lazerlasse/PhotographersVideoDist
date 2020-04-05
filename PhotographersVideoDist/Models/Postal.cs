@@ -11,7 +11,7 @@ namespace PhotographersVideoDist.Models
 	{
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		[Key, MaxLength(4), Display(Name = "Postnummer"), DataType(DataType.PostalCode)]
-		public int PostalCode { get; set; }
+		public string PostalCode { get; set; }
 		
 		[Display(Name = "By")]
 		public string Town { get; set; }
