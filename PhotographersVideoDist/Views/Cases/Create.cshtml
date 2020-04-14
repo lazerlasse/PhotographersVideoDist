@@ -1,17 +1,16 @@
 ﻿@model PhotographersVideoDist.Models.Case
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Opret sag";
 }
 
-<h1>Create</h1>
+<h1>Opret sag</h1>
 
-<h4>Case</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="Titel" class="control-label"></label>
                 <input asp-for="Titel" class="form-control" />
@@ -19,7 +18,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Details" class="control-label"></label>
-                <input asp-for="Details" class="form-control" />
+                <textarea asp-for="Details" class="form-control" rows="5"></textarea>
                 <span asp-validation-for="Details" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,34 +27,66 @@
                 <span asp-validation-for="Comments" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Street" class="control-label"></label>
-                <input asp-for="Street" class="form-control" />
-                <span asp-validation-for="Street" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PostalCode" class="control-label"></label>
-                <select asp-for="PostalCode" class ="form-control" asp-items="ViewBag.PostalCode"></select>
-            </div>
-            <div class="form-group">
                 <label asp-for="Published" class="control-label"></label>
-                <input asp-for="Published" class="form-control" />
+                <input asp-for="Published" class="form-control" type="datetime" />
                 <span asp-validation-for="Published" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="PhotographerID" class="control-label"></label>
-                <select asp-for="PhotographerID" class ="form-control" asp-items="ViewBag.PhotographerID"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+            <br /><hr />
+        </div>
     </div>
-</div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group" id="locationField">
+                <h4 class="control-label">Find adresse</h4>
+                <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" />
+            </div>
+            <hr /><br />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Street" class="control-label"></label>
+                <input asp-for="Street" class="form-control" id="route" readonly/>
+                <span asp-validation-for="Street" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="Postal.PostalCode" class="control-label"></label>
+                <input asp-for="PostalCode" class="form-control" id="postal_code" readonly />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Postal.Town" class="control-label"></label>
+                <input asp-for="Postal.Town" class="form-control" id="locality" readonly />
+            </div>
+            <br /><hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <input type="submit" value="Opret" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</form>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Fortryd</a>
 </div>
 
 @section Scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJ75Pdi2BY29NNqL419zu7qttWjn6hglw&libraries=places&callback=initAutocomplete" async defer></script>
+    <script src="~/js/GoogleGeoLocationAutocomplete.js"></script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
