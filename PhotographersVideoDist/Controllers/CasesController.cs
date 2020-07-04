@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PhotographersVideoDist.Data;
 using PhotographersVideoDist.Models;
+using PhotographersVideoDist.Paging;
 
 namespace PhotographersVideoDist.Controllers
 {
@@ -20,7 +21,7 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 		// GET: Cases
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(int? pageNumber)
 		{
 			// Query cases from db.
 			var cases = Context.Cases
@@ -28,8 +29,11 @@ namespace PhotographersVideoDist.Controllers
 				.Include(p => p.Postal)
 				.AsNoTracking();
 
+			// Set page size.
+			int pageSize = 3;
+
 			// Return View and load content async.
-			return View(await cases.ToListAsync());
+			return View(await PaginatedList<Case>.CreateAsync(cases, pageNumber ?? 1, pageSize));
 		}
 
 		// GET: Cases/Details/5
