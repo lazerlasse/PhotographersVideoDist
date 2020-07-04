@@ -58,7 +58,7 @@ namespace PhotographersVideoDist.Data
 				},
 			};
 
-			// Loop through the users and add them...
+			// Loop through the administrators and add them...
 			foreach (IdentityUser user in administrators)
 			{
 				// Ensure you have these values in your appsettings.json file...
@@ -76,7 +76,7 @@ namespace PhotographersVideoDist.Data
 				}
 			}
 
-			// Create default operator users...
+			// Create default customer users...
 			var customers = new IdentityUser[]
 			{
 				new IdentityUser
@@ -87,7 +87,7 @@ namespace PhotographersVideoDist.Data
 				}
 			};
 
-			// Loop through operators and add them...
+			// Loop through customers and add them...
 			foreach (IdentityUser user in customers)
 			{
 				// Ensure you have these values in your appsettings.json file...
@@ -106,7 +106,7 @@ namespace PhotographersVideoDist.Data
 			}
 
 
-			// Create default requestor users...
+			// Create default photographer users...
 			var photographers = new IdentityUser[]
 			{
 				new IdentityUser
@@ -123,7 +123,7 @@ namespace PhotographersVideoDist.Data
 				}
 			};
 
-			// Loop through requestors and add them...
+			// Loop through photographers and add them...
 			foreach (IdentityUser user in photographers)
 			{
 				// Ensure you have these values in your appsettings.json file...

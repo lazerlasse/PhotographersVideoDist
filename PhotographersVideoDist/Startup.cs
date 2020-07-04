@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using PhotographersVideoDist.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using PhotographersVideoDist.Authorization;
 
 namespace PhotographersVideoDist
 {
@@ -113,6 +114,12 @@ namespace PhotographersVideoDist
 					options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
 					options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
 				});
+
+			// Add Authorization Policies.
+			services.AddScoped<IAuthorizationHandler, IsOwnerAuthorizationHandler>();
+			services.AddSingleton<IAuthorizationHandler, AdministratorsAuthorizationHandler>();
+			services.AddSingleton<IAuthorizationHandler, CustomersAuthorizationHandler>();
+			services.AddSingleton<IAuthorizationHandler, PhotographersAuthorizationHandler>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

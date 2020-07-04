@@ -2,38 +2,68 @@
 
 @{
     ViewData["Title"] = "Sags oversigt";
-    int columnCount = 0;
 }
 
 <h1>Sags oversigt</h1>
 
-<p>
-    <a asp-action="Create">Opret ny sag</a>
-</p>
+@if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Create)).Succeeded)
+{
+    <p>
+        <a asp-action="Create">Opret ny sag</a>
+    </p>
+}
 
 <hr />
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Titel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Published)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Photographer)
+            </th>
+            <th>
 
-@for (int r = 0; r < 9; r++)
-{
-    <div class="row">
-        @for (int c = 0; c < 6; c++)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
         {
-            <article  id="@r@c" class="col-md-2">
-                <a id="link-@r@c" asp-action="Details" asp-route-id="" rel="bookmark">
-                    <img id="img-@r@c" class="img-thumbnail"/>
-                </a>
-                <div>
-                    <h2>
-                        <a id="titel-@r@c" asp-action="Details" asp-route-id="" rel="bookmark"></a>
-                    </h2>
-                    <div id="published-@r@c">
-                    </div>
-                </div>
-            </article>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Titel)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Published)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Photographer.UserName)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.CaseID">Vis sag</a>
+
+                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Update)).Succeeded)
+                    {
+                        <br />
+                        <a asp-action="Edit" asp-route-id="@item.CaseID">Rediger</a>
+                    }
+
+                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Delete)).Succeeded)
+                    {
+                        <br />
+                        <a asp-action="Delete" asp-route-id="@item.CaseID">Slet</a>
+                    }
+                </td>
+            </tr>
         }
-    </div>
-}
+    </tbody>
+</table>
 
 
 @{
@@ -51,14 +81,3 @@
    class="btn btn-default @nextDisabled">
     Næste
 </a>
-
-<script>
-    $(function () {
-        for (var r = 0; r < 9; r++) {
-            for (var c = 0; c < Model.Count; c++) {
-                var titelId = "titel-" + r.toString() + c.toString();
-                document.getElementById(titelId).value(Model[c].Titel);
-            };
-        };
-    });
-</script>

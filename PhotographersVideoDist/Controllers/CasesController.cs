@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using PhotographersVideoDist.Data;
 using PhotographersVideoDist.Models;
 using PhotographersVideoDist.Paging;
+using PhotographersVideoDist.Authorization;
 
 namespace PhotographersVideoDist.Controllers
 {
@@ -23,6 +24,18 @@ namespace PhotographersVideoDist.Controllers
 		// GET: Cases
 		public async Task<IActionResult> Index(int? pageNumber)
 		{
+			// Authorization requirements.
+			var AuthorizeRequirements = 
+				User.IsInRole(Constants.AdministratorsRole) || 
+				User.IsInRole(Constants.CustomersRole) || 
+				User.IsInRole(Constants.PhotographersRole);
+
+			// Check requirements is matched.
+			if (!AuthorizeRequirements)
+			{
+				return Forbid();
+			}
+
 			// Query cases from db.
 			var cases = Context.Cases
 				.Include(p => p.Photographer)
