@@ -71,18 +71,32 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
+			// Check current user are authorized to read this case..
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToView, AuthorizationOperations.Read)).Succeeded)
+			{
+				Forbid();
+			}
+
 			// Return view.
 			return View(caseToView);
 		}
 
 		// GET: Cases/Create
-		public IActionResult Create()
+		public async Task<IActionResult> CreateAsync()
 		{
+			// Create new case and set DateTime to now.
 			var caseToCreate = new Case()
 			{
 				Published = DateTime.Now
 			};
 
+			// Check current user have create rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Create)).Succeeded)
+			{
+				Forbid();
+			}
+
+			// Return View with new case.
 			return View(caseToCreate);
 		}
 
@@ -98,6 +112,12 @@ namespace PhotographersVideoDist.Controllers
 				// Set current user as photographer.
 				caseToCreate.PhotographerID = UserManager.GetUserId(User);
 
+				// Check user have create rights.
+				if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Create)).Succeeded)
+				{
+					Forbid();
+				}
+
 				// Add the case to data context and save async.
 				Context.Add(caseToCreate);
 				await Context.SaveChangesAsync();
@@ -106,7 +126,7 @@ namespace PhotographersVideoDist.Controllers
 				return RedirectToAction(nameof(Index));
 			}
 
-			// Saving case failed, return create view.
+			// Saving new case failed, return create view.
 			return View(caseToCreate);
 		}
 
@@ -131,8 +151,16 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
+			// Validate current user have edit rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToEdit, AuthorizationOperations.Update)).Succeeded)
+			{
+				Forbid();
+			}
+
 			// Populate dropdown boxes.
 			ViewData["PostalCode"] = new SelectList(Context.Postals, "PostalCode", "Town", caseToEdit.PostalCode);
+			
+			// Return View with case to edit.
 			return View(caseToEdit);
 		}
 
@@ -161,6 +189,12 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
+			// Validate current user have update rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToUpdate, AuthorizationOperations.Update)).Succeeded)
+			{
+				Forbid();
+			}
+
 			// Try update model async.
 			if (await TryUpdateModelAsync<Case>(
 				caseToUpdate,
@@ -175,9 +209,8 @@ namespace PhotographersVideoDist.Controllers
 				catch (DbUpdateConcurrencyException)
 				{
 					//Log the error (uncomment ex variable name and write a log.)
-					ModelState.AddModelError("", "Unable to save changes. " +
-						"Try again, and if the problem persists, " +
-						"see your system administrator.");
+					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
+						"Prøv venligst igen! Hvis fejlen fortsætter, kontakt en administrator.");
 				}
 
 				// Succeded return to index.
@@ -186,6 +219,8 @@ namespace PhotographersVideoDist.Controllers
 
 			// Update failed - Pupolate postal dropdown box.
 			ViewData["PostalCode"] = new SelectList(Context.Postals, "PostalCode", "Town", caseToUpdate.PostalCode);
+
+			// Return back to edit view.
 			return View(caseToUpdate);
 		}
 
@@ -211,6 +246,12 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
+			// Validate current user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToDelete, AuthorizationOperations.Delete)).Succeeded)
+			{
+				Forbid();
+			}
+
 			// Return View.
 			return View(caseToDelete);
 		}
@@ -229,6 +270,18 @@ namespace PhotographersVideoDist.Controllers
 			// load case to delete.
 			var caseToDelete = await Context.Cases
 				.FirstOrDefaultAsync(c => c.CaseID == id);
+
+			// Check loaded case not null.
+			if (caseToDelete == null)
+			{
+				return NotFound();
+			}
+
+			// Validate current user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToDelete, AuthorizationOperations.Delete)).Succeeded)
+			{
+				Forbid();
+			}
 
 			// Remove case from context and save changes to db.
 			Context.Cases.Remove(caseToDelete);
