@@ -19,7 +19,8 @@ namespace PhotographersVideoDist.Authorization
 			}
 
 			// If we're not asking for following permission, return.
-			if (requirement.Name != Constants.IsCustomerOperationName)
+			if (requirement.Name != Constants.IsCustomerOperationName && 
+				requirement.Name != Constants.ReadOperationName)
 			{
 				return Task.CompletedTask;
 			}

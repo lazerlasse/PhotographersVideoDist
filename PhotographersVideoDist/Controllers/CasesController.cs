@@ -24,16 +24,10 @@ namespace PhotographersVideoDist.Controllers
 		// GET: Cases
 		public async Task<IActionResult> Index(int? pageNumber)
 		{
-			// Authorization requirements.
-			var AuthorizeRequirements = 
-				User.IsInRole(Constants.AdministratorsRole) || 
-				User.IsInRole(Constants.CustomersRole) || 
-				User.IsInRole(Constants.PhotographersRole);
-
-			// Check requirements is matched.
-			if (!AuthorizeRequirements)
+			// Check current user have read rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Read)).Succeeded)
 			{
-				return Forbid();
+				Forbid();
 			}
 
 			// Query cases from db.
