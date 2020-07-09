@@ -1,60 +1,97 @@
 ﻿@model PhotographersVideoDist.Models.Case
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Vis sag";
 }
 
-<h1>Details</h1>
+<h4>Sags nr. @Model.CaseID</h4>
+<hr />
 
-<div>
-    <h4>Case</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Titel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Titel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Details)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Details)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Comments)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Comments)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Street)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Street)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Postal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Postal.PostalCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Published)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Published)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Photographer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Photographer.Id)
-        </dd>
-    </dl>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="Titel"></label></h6>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.CaseID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Titel</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="Details"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Details</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="Comments"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Comments</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="Street"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Street</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <h6><label asp-for="Postal.PostalCode"></label></h6>
+    </div>
+    <div class="col-md-4">
+        <h6><label asp-for="Postal.Town"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <p>@Model.Postal.PostalCode</p>
+    </div>
+    <div class="col-md-4">
+        <p>@Model.Postal.Town</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="Published"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Published</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h6><label asp-for="PhotographerID"></label></h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>@Model.Photographer.UserName</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <hr />
+        @if ((await AuthorizationService.AuthorizeAsync(User, Model, AuthorizationOperations.Update)).Succeeded)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.CaseID" class="btn btn-primary">Rediger</a>
+            <text> | </text>
+        }
+        <a asp-action="Index" class="btn btn-primary">Oversigt</a>
+        <hr />
+    </div>
 </div>
