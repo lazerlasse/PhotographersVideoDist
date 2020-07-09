@@ -1,63 +1,44 @@
 ﻿@model PhotographersVideoDist.Models.Case
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Slet sag";
 }
 
-<h1>Delete</h1>
+<h2>Sags nr. @Model.CaseID</h2>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Er du sikker på du vil slette denne sag?</h3>
 <div>
-    <h4>Case</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-3">
             @Html.DisplayNameFor(model => model.Titel)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-9">
             @Html.DisplayFor(model => model.Titel)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-3">
             @Html.DisplayNameFor(model => model.Details)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-9">
             @Html.DisplayFor(model => model.Details)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Comments)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Comments)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Street)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Street)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Postal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Postal.PostalCode)
-        </dd class>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-3">
             @Html.DisplayNameFor(model => model.Published)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-9">
             @Html.DisplayFor(model => model.Published)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Photographer)
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.PhotographerID)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Photographer.Id)
+        <dd class = "col-sm-9">
+            @Html.DisplayFor(model => model.Photographer.UserName)
         </dd class>
     </dl>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="CaseID" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Slet" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-danger">Fortryd</a>
     </form>
 </div>

@@ -238,7 +238,6 @@ namespace PhotographersVideoDist.Controllers
 			// Load case to delete.
 			var caseToDelete = await Context.Cases
 				.Include(p => p.Photographer)
-				.Include(p => p.Postal)
 				.AsNoTracking()
 				.FirstOrDefaultAsync(m => m.CaseID == id);
 
@@ -287,7 +286,16 @@ namespace PhotographersVideoDist.Controllers
 
 			// Remove case from context and save changes to db.
 			Context.Cases.Remove(caseToDelete);
-			await Context.SaveChangesAsync();
+
+			try
+			{
+				await Context.SaveChangesAsync();
+			}
+			catch (DbUpdateException)
+			{
+				ModelState.AddModelError("", "Sagen blev ikke slettet. " +
+						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+			}
 
 			// Return to index.
 			return RedirectToAction(nameof(Index));
@@ -296,7 +304,7 @@ namespace PhotographersVideoDist.Controllers
 		//**************************************************************************//
 		//******************  Json result for autocomplete functions   *************//
 		//**************************************************************************//
-		
+
 		// Get cities json for autocomplete.
 		[HttpPost]
 		public JsonResult GetCities(string prefix)
@@ -304,8 +312,8 @@ namespace PhotographersVideoDist.Controllers
 			//var cityList = new List<string>();
 
 			var cityList = (from C in Context.Postals
-					where C.Town.ToLower().StartsWith(prefix.ToLower())
-					select new { label = C.Town, value = C.PostalCode });
+							where C.Town.ToLower().StartsWith(prefix.ToLower())
+							select new { label = C.Town, value = C.PostalCode });
 
 			return Json(cityList);
 		}
@@ -315,8 +323,8 @@ namespace PhotographersVideoDist.Controllers
 		public JsonResult GetPostals(string prefix)
 		{
 			var postalList = (from C in Context.Postals
-							where C.PostalCode.StartsWith(prefix)
-							select new { label = C.Town, value = C.PostalCode });
+							  where C.PostalCode.StartsWith(prefix)
+							  select new { label = C.Town, value = C.PostalCode });
 
 			return Json(postalList);
 		}
