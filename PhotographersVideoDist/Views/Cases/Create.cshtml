@@ -39,7 +39,7 @@
         <div class="col-md-6">
             <div class="form-group" id="locationField">
                 <h4 class="control-label">Find adresse</h4>
-                <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" />
+                <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" placeholder="Skriv adresse" />
             </div>
             <hr /><br />
         </div>
@@ -68,22 +68,20 @@
                 <label asp-for="Postal.Town" class="control-label"></label>
                 <input asp-for="Postal.Town" class="form-control" id="locality" onfocus="findCity()" />
             </div>
-            <br /><hr />
+            <br />
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <input type="submit" value="Opret" class="btn btn-primary" />
-            </div>
+        <div class="col-md-6 text-md-center">
+            <hr />
+            <input type="submit" value="Gem" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-primary">Fortryd</a>
+            <hr />
         </div>
     </div>
 </form>
 
-<div>
-    <a asp-action="Index">Fortryd</a>
-</div>
 
 @section Scripts {
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJ75Pdi2BY29NNqL419zu7qttWjn6hglw&libraries=places&callback=initAutocomplete" async defer></script>

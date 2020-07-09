@@ -165,9 +165,6 @@ namespace PhotographersVideoDist.Controllers
 				Forbid();
 			}
 
-			// Populate dropdown boxes.
-			ViewData["PostalCode"] = new SelectList(Context.Postals, "PostalCode", "Town", caseToEdit.PostalCode);
-			
 			// Return View with case to edit.
 			return View(caseToEdit);
 		}
@@ -218,17 +215,14 @@ namespace PhotographersVideoDist.Controllers
 				{
 					//Log the error (uncomment ex variable name and write a log.)
 					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
-						"Prøv venligst igen! Hvis fejlen fortsætter, kontakt en administrator.");
+						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 				}
 
 				// Succeded return to index.
 				return RedirectToAction(nameof(Index));
 			}
 
-			// Update failed - Pupolate postal dropdown box.
-			ViewData["PostalCode"] = new SelectList(Context.Postals, "PostalCode", "Town", caseToUpdate.PostalCode);
-
-			// Return back to edit view.
+			// Save changes failed, return to view.
 			return View(caseToUpdate);
 		}
 
