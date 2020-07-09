@@ -24,9 +24,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                         </li>
-                        <li>
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Cases" asp-action="Index">Sager</a>
-                        </li>
+                        @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Read)).Succeeded)
+                        {
+                            <li>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Cases" asp-action="Index">Sager</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privatlivspolitik</a>
                         </li>

@@ -11,6 +11,7 @@ using PhotographersVideoDist.Data;
 using PhotographersVideoDist.Models;
 using PhotographersVideoDist.Paging;
 using PhotographersVideoDist.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace PhotographersVideoDist.Controllers
 {
@@ -99,17 +100,30 @@ namespace PhotographersVideoDist.Controllers
 		// more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("CaseID,Titel,Details,Comments,Street,PostalCode,Published")] Case caseToCreate)
+		public async Task<IActionResult> Create([Bind("CaseID,Titel,Details,Comments,Street,Published")] Case caseToCreate, [Bind("PostalCode,Town")] Postal postal)
 		{
 			if (ModelState.IsValid)
 			{
-				// Set current user as photographer.
-				caseToCreate.PhotographerID = UserManager.GetUserId(User);
-
 				// Check user have create rights.
 				if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Create)).Succeeded)
 				{
 					Forbid();
+				}
+
+				// Set current user as photographer.
+				caseToCreate.PhotographerID = UserManager.GetUserId(User);
+
+				// Check and update Town and Postalcode.
+				if (postal.PostalCode == null && postal.Town != null)
+				{
+					var postalResult = await Context.Postals
+						.AsNoTracking()
+						.FirstOrDefaultAsync(p => p.Town.ToLower().Contains(postal.Town.ToLower()));
+
+					if (postalResult != null)
+					{
+						caseToCreate.PostalCode = postalResult.PostalCode;
+					}
 				}
 
 				// Add the case to data context and save async.
@@ -288,6 +302,8 @@ namespace PhotographersVideoDist.Controllers
 		//**************************************************************************//
 		//******************  Json result for autocomplete functions   *************//
 		//**************************************************************************//
+		
+		// Get cities json for autocomplete.
 		[HttpPost]
 		public JsonResult GetCities(string prefix)
 		{
@@ -298,6 +314,17 @@ namespace PhotographersVideoDist.Controllers
 					select new { label = C.Town, value = C.PostalCode });
 
 			return Json(cityList);
+		}
+
+		// Get postalcode json for autocomplete.
+		[HttpPost]
+		public JsonResult GetPostals(string prefix)
+		{
+			var postalList = (from C in Context.Postals
+							where C.PostalCode.StartsWith(prefix)
+							select new { label = C.Town, value = C.PostalCode });
+
+			return Json(postalList);
 		}
 
 		private bool CaseExists(int id)

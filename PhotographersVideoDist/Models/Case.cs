@@ -23,12 +23,12 @@ namespace PhotographersVideoDist.Models
 		public string Comments { get; set; }
 
 		
-		[Required, Display(Name = "Vej")]
+		[Display(Name = "Vej")]
 		public string Street { get; set; }
 
 
 		// Navigation Properties for Postalcode and Town.
-		[ForeignKey("Postal"), Required, MaxLength(4), MinLength(4)]
+		[ForeignKey("Postal"), MaxLength(4), MinLength(4)]
 		public string PostalCode { get; set; }		// FK For Postal.
 		public Postal Postal { get; set; }      // Navigation Property For Postal.
 

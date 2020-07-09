@@ -49,7 +49,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="Street" class="control-label"></label>
-                <input asp-for="Street" class="form-control" id="route" readonly/>
+                <input asp-for="Street" class="form-control" id="route" />
                 <span asp-validation-for="Street" class="text-danger"></span>
             </div>
         </div>
@@ -59,14 +59,14 @@
         <div class="col-md-2">
             <div class="form-group">
                 <label asp-for="Postal.PostalCode" class="control-label"></label>
-                <input asp-for="PostalCode" class="form-control" id="postal_code" readonly />
+                <input asp-for="PostalCode" class="form-control" id="postal_code" onfocus="findPostal()" />
                 <span asp-validation-for="PostalCode" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 <label asp-for="Postal.Town" class="control-label"></label>
-                <input asp-for="Postal.Town" class="form-control" id="locality" readonly />
+                <input asp-for="Postal.Town" class="form-control" id="locality" onfocus="findCity()" />
             </div>
             <br /><hr />
         </div>
@@ -88,5 +88,6 @@
 @section Scripts {
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJ75Pdi2BY29NNqL419zu7qttWjn6hglw&libraries=places&callback=initAutocomplete" async defer></script>
     <script src="~/js/GoogleGeoLocationAutocomplete.js"></script>
+    <script src="~/js/Cities-Autocomplete.js"></script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
