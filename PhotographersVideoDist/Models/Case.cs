@@ -41,6 +41,11 @@ namespace PhotographersVideoDist.Models
 		// Navigation Properties for IdentityUser (Photographer).
 		[Display(Name = "Fotograf")]
 		public string PhotographerID { get; set; }					// FK for IdentityUser Photographer.
-		public virtual IdentityUser Photographer { get; set; }		// Navigation property for IdentityUser.
+		public virtual IdentityUser Photographer { get; set; }      // Navigation property for IdentityUser.
+
+
+		// Navigation Properties for ImageAssets.
+		[Display(Name = "Billeder")]
+		public ICollection<ImageAssets> ImageAssets { get; set; }	// Navigation property for ImageAssets.
 	}
 }
