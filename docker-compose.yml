@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  photographersvideodist:
+    image: ${DOCKER_REGISTRY-}photographersvideodist
+    build:
+      context: .
+      dockerfile: PhotographersVideoDist/Dockerfile

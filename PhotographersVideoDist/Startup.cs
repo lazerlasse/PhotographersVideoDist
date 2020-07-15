@@ -44,15 +44,15 @@ namespace PhotographersVideoDist
 			});
 
 
-			SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
-			Configuration.GetConnectionString("PVD_db_Connection"))
-			{
-				Password = Configuration["DbPWD"]
-			};
+			//SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
+			//Configuration.GetConnectionString("PVD_db_Connection"))
+			//{
+			//	Password = Configuration["DbPWD"]
+			//};
 
 			// Set the dbcontext sql connection settings...
 			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseMySql(MySqlconnection.ConnectionString));
+				options.UseMySql(Configuration.GetConnectionString("PVD_db_Connection")));
 
 
 			// Add identity and roles...

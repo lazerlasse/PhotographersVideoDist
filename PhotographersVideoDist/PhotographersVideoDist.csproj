@@ -5,6 +5,7 @@
     <UserSecretsId>aspnet-PhotographersVideoDist-8D9FDD81-0418-46D5-96D6-136EF7D5F505</UserSecretsId>
     <ApplicationIcon>wwwroot\Images\browser-ikon.ico</ApplicationIcon>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
 

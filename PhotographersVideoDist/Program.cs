@@ -30,14 +30,14 @@ namespace PhotographersVideoDist
 				// dotnet user-secrets set SeedUserPW <pw>
 
 				string adminUserPWD = config["SeedUserPW"];
-				SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
-				config.GetConnectionString("PVD_db_Connection"))
-				{
-					Password = config["DbPWD"]
-				};
+				//SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
+				//config.GetConnectionString("PVD_db_Connection"))
+				//{
+				//	Password = config["DbPWD"]
+				//};
 
 				// Seed Postal data.
-				SeedDefaultData.SeedData(MySqlconnection.ConnectionString, context);
+				SeedDefaultData.SeedData(config.GetConnectionString("PVD_db_Connection"), context);
 
 				try
 				{
