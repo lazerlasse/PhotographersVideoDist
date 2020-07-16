@@ -33,7 +33,7 @@ namespace PhotographersVideoDist
 				SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
 				config.GetConnectionString("PVD_db_Connection"))
 				{
-					Password = config["DbPWD"]
+					Password = Environment.GetEnvironmentVariable("DbPWD")
 				};
 
 				// Seed Postal data.
