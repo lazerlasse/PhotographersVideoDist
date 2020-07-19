@@ -13,6 +13,9 @@ namespace PhotographersVideoDist.Models
 		[Key]
 		public int CaseID { get; set; }
 
+		[Display(Name = "Offentlig")]
+		public bool IsPublished { get; set; } = true;
+
 		[Required]
 		public string Titel { get; set; }
 
@@ -21,7 +24,6 @@ namespace PhotographersVideoDist.Models
 
 		[Display(Name = "Kommentar/Bemærkninger")]
 		public string Comments { get; set; }
-
 		
 		[Display(Name = "Vej")]
 		public string Street { get; set; }
@@ -46,6 +48,11 @@ namespace PhotographersVideoDist.Models
 
 		// Navigation Properties for ImageAssets.
 		[Display(Name = "Billeder")]
-		public ICollection<ImageAssets> ImageAssets { get; set; }	// Navigation property for ImageAssets.
+		public ICollection<ImageAssets> ImageAssets { get; set; }	// Collection of ImageAssets - one to many.
+
+
+		// Navigation Properties for VideoAssets.
+		[Display(Name = "Videoer")]
+		public ICollection<VideoAssets> VideoAssets { get; set; }	// Collection of VideoAssets - one to many.
 	}
 }

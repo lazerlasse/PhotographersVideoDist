@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +17,7 @@ namespace PhotographersVideoDist
 	{
 		public static void Main(string[] args)
 		{
-			var host = CreateHostBuilder(args).Build();
+			var host = CreateWebHostBuilder(args).Build();
 
 			using (var scope = host.Services.CreateScope())
 			{
@@ -24,15 +25,12 @@ namespace PhotographersVideoDist
 				var context = services.GetRequiredService<ApplicationDbContext>();
 				//context.Database.Migrate();
 
-				// requires using Microsoft.Extensions.Configuration;
 				IConfiguration config = host.Services.GetRequiredService<IConfiguration>();
-				// Set password with the Secret Manager tool.
-				// dotnet user-secrets set SeedUserPW <pw>
 
-				string adminUserPWD = config["SeedUserPW"];
 				SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
 				config.GetConnectionString("PVD_db_Connection"))
 				{
+					// Set Passwords in system/Enviroment varibles.
 					Password = Environment.GetEnvironmentVariable("DbPWD")
 				};
 
@@ -41,7 +39,8 @@ namespace PhotographersVideoDist
 
 				try
 				{
-					SeedUsersAndRoles.SeedData(services, adminUserPWD).Wait();
+					// Set Passwords in system/Enviroment varibles.
+					SeedUsersAndRoles.SeedData(services, Environment.GetEnvironmentVariable("SeedUserPWD")).Wait();
 				}
 				catch (Exception ex)
 				{
@@ -53,15 +52,16 @@ namespace PhotographersVideoDist
 			host.Run();
 		}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				})
+		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+			WebHost.CreateDefaultBuilder(args)
+				.UseStartup<Startup>()
 				.ConfigureLogging(logging =>
 				{
 					logging.AddConsole();
+				})
+				.UseKestrel(options =>
+				{
+					options.Limits.MaxRequestBodySize = null; // or a given limit
 				});
 	}
 }

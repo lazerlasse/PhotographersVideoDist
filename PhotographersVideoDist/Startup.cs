@@ -20,6 +20,8 @@ using PhotographersVideoDist.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using PhotographersVideoDist.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace PhotographersVideoDist
 {
@@ -35,6 +37,12 @@ namespace PhotographersVideoDist
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.Configure<FormOptions>(x =>
+			{
+				x.ValueLengthLimit = int.MaxValue;
+				x.MultipartBodyLengthLimit = int.MaxValue; // In case of multipart
+			});
+
 			// Configure Cookie Policy options...
 			services.Configure<CookiePolicyOptions>(options =>
 			{
@@ -125,6 +133,11 @@ namespace PhotographersVideoDist
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
+			app.UseForwardedHeaders(new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+			});
+
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

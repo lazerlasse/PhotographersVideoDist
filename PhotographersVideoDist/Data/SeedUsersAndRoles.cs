@@ -111,15 +111,33 @@ namespace PhotographersVideoDist.Data
 			{
 				new IdentityUser
 				{
-					UserName = "Fotograf",
+					UserName = "fotograf",
 					Email = "fotograf@fixitmedia.dk",
 					EmailConfirmed = true,
 				},
 				new IdentityUser
 				{
-					UserName = "Michael",
+					UserName = "dex",
 					Email = "michael@fixitmedia.dk",
 					EmailConfirmed = true,
+				},
+				new IdentityUser
+				{
+					UserName = "morten",
+					Email = "morten@fixitmedia.dk",
+					EmailConfirmed = true
+				},
+				new IdentityUser
+				{
+					UserName = "nicklas",
+					Email = "nicklas@fixitmedia.dk",
+					EmailConfirmed = true
+				},
+				new IdentityUser
+				{
+					UserName = "miki",
+					Email = "miki@fixitmedia.dk",
+					EmailConfirmed = true
 				}
 			};
 
