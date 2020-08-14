@@ -262,9 +262,7 @@ namespace PhotographersVideoDist.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageFileName")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<string>("ImageFilePath")
+                        .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<bool>("ImageIsPrimary")
@@ -301,9 +299,7 @@ namespace PhotographersVideoDist.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("VideoAssetsFileName")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<string>("VideoAssetsFilePath")
+                        .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("VideoAssetsID");

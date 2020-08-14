@@ -28,6 +28,7 @@ namespace PhotographersVideoDist.Authorization
 
 			// If we're not asking for the following permission, return.
 			if (requirement.Name != Constants.UpdateOperationName &&
+				requirement.Name != Constants.IsOwnerOperationName &&
 				requirement.Name != Constants.DeleteOperationName)
 			{
 				return Task.CompletedTask;

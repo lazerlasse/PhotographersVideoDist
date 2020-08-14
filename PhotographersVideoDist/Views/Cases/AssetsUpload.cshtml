@@ -1,0 +1,159 @@
+﻿@model PhotographersVideoDist.Models.AssetsUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Assets";
+}
+
+<h4>Sags nr. @Model.Case.CaseID</h4>
+<hr />
+
+<section>
+    <div class="row">
+        <div class="col-md-6">
+            <h6><label asp-for="Case.Titel"></label></h6>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <p>@Model.Case.Titel</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h6><label asp-for="Case.Details"></label></h6>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <p>@Model.Case.Details</p>
+        </div>
+    </div>
+</section>
+
+<hr />
+
+<section>
+    @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
+    {
+        <form enctype="multipart/form-data" asp-action="/Cases/Upload">
+            <div class="row">
+                <div class="col-md-6">
+                    <input id="routevalue" name="id" type="hidden" value="@Model.Case.CaseID" />
+                    <input id="fileupload" name="files" type="file" multiple class="btn" />
+                    <button id="btnUploadAll" class="btn btn-primary" type="button">Upload</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="progress">
+                        <div class="bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="well hide" id="filelistholder"></div>
+                </div>
+            </div>
+        </form>
+    }
+</section>
+
+<hr />
+
+<section>
+    <table class="table">
+        <thead title="Video Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <label>Video Assets</label>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var videoAssets in Model.Case.VideoAssets)
+            {
+                <tr class="row">
+                    <td class=" offset-md-2 col-md-8">
+                        <p><span>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)</span><p>
+                        <p><span>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</span></p>
+                        <video title="" class="video-full-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
+                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.Delete)).Succeeded)
+                        {
+                            <a class="btn alert-danger" asp-action="DeleteVideoAssets" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseId="@videoAssets.CaseID">Slet</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<hr />
+
+<section>
+    <table class="table">
+        <thead title="Billede Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <label>Image Assets</label>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var imageAssets in Model.Case.ImageAssets)
+            {
+                <tr class="row">
+                    <td class="offset-md-2 col-md-8">
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</span></p>
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
+
+                        <img class="full-height-width img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
+                        
+                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
+                        {
+                            <a class="btn btn-danger" asp-action="DeleteImageAssets" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseId="@imageAssets.CaseID">Slet</a>
+                            <input type="radio" name="Udvalgt" asp-for="@imageAssets.ImageIsPrimary" />
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@section Scripts {
+    <script type="text/javascript">
+        $('#fileupload').fileupload({
+            type: "post",
+            dataType: "json",
+            url: "/Cases/Upload",
+            limitConcurrentUploads: 1,
+            sequentialUploads: true,
+            progressInterval: 100,
+            add: function (e, data) {
+                $('#filelistholder').removeClass('hide');
+                data.context = $('<div />').text(data.files[0].name).appendTo('#filelistholder');
+                $('</div><div class="progress"><div class="bar" style="width:0%"></div></div>').appendTo(data.context);
+                $('#btnUploadAll').click(function () {
+                    data.submit();
+                });
+            },
+            done: function (e, data) {
+                data.context.text(data.files[0].name + " - " + data.result.value);
+            },
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .bar').css(
+                    'width',
+                    progress + '%'
+                );
+            },
+            progress: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                data.context.find('.bar').css('width', progress + '%');
+            }
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

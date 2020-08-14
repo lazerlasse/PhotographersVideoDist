@@ -16,5 +16,7 @@ namespace PhotographersVideoDist.Data
 
 		public DbSet<Case> Cases { get; set; }
 		public DbSet<Postal> Postals { get; set; }
+		public DbSet<ImageAssets> ImageAssets { get; set; }
+		public DbSet<VideoAssets> VideoAssets { get; set; }
 	}
 }

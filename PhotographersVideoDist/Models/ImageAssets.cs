@@ -12,14 +12,11 @@ namespace PhotographersVideoDist.Models
 		[Key, Display(Name = "Billede ID")]
 		public int ImageAssetsID { get; set; }
 
-		[Display(Name = "Filnavn")]
+		[Display(Name = "Filnavn"), Required]
 		public string ImageFileName { get; set; }
 
-		[Display(Name = "Placering")]
-		public string ImageFilePath { get; set; }
-
 		[Display(Name = "Udvalgt billede")]
-		public bool ImageIsPrimary { get; set; }
+		public bool ImageIsPrimary { get; set; } = false;
 
 		
 		// Navigation Properties.

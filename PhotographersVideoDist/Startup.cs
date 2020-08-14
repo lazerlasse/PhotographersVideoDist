@@ -22,6 +22,8 @@ using Microsoft.Data.SqlClient;
 using PhotographersVideoDist.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace PhotographersVideoDist
 {
@@ -149,7 +151,9 @@ namespace PhotographersVideoDist
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 			}
+
 			app.UseHttpsRedirection();
+
 			app.UseStaticFiles();
 
 			app.UseRouting();
