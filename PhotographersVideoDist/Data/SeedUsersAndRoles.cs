@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using PhotographersVideoDist.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace PhotographersVideoDist.Data
 		{
 			// Initializing Role and Usermanager 
 			var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-			var UserManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+			var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
 			// Seed Data Async.
 			await SeedRoles(RoleManager);
@@ -45,12 +46,12 @@ namespace PhotographersVideoDist.Data
 
 
 		// Seed Default Users...
-		private static async Task SeedUsers(UserManager<IdentityUser> userManager, string adminUserPWD)
+		private static async Task SeedUsers(UserManager<ApplicationUser> userManager, string adminUserPWD)
 		{
 			// Create List of admin users to add...
-			var administrators = new IdentityUser[]
+			var administrators = new ApplicationUser[]
 			{
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "Lasse",
 					Email = "brandmandlasse@gmail.com",
@@ -59,7 +60,7 @@ namespace PhotographersVideoDist.Data
 			};
 
 			// Loop through the administrators and add them...
-			foreach (IdentityUser user in administrators)
+			foreach (ApplicationUser user in administrators)
 			{
 				// Ensure you have these values in your appsettings.json file...
 				var _user = await userManager.FindByEmailAsync(user.Email);
@@ -77,9 +78,9 @@ namespace PhotographersVideoDist.Data
 			}
 
 			// Create default customer users...
-			var customers = new IdentityUser[]
+			var customers = new ApplicationUser[]
 			{
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "Kunde",
 					Email = "kunde@fixitmedia.dk",
@@ -88,7 +89,7 @@ namespace PhotographersVideoDist.Data
 			};
 
 			// Loop through customers and add them...
-			foreach (IdentityUser user in customers)
+			foreach (ApplicationUser user in customers)
 			{
 				// Ensure you have these values in your appsettings.json file...
 				var _user = await userManager.FindByEmailAsync(user.Email);
@@ -107,33 +108,33 @@ namespace PhotographersVideoDist.Data
 
 
 			// Create default photographer users...
-			var photographers = new IdentityUser[]
+			var photographers = new ApplicationUser[]
 			{
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "fotograf",
 					Email = "fotograf@fixitmedia.dk",
 					EmailConfirmed = true,
 				},
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "dex",
 					Email = "michael@fixitmedia.dk",
 					EmailConfirmed = true,
 				},
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "morten",
 					Email = "morten@fixitmedia.dk",
 					EmailConfirmed = true
 				},
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "nicklas",
 					Email = "nicklas@fixitmedia.dk",
 					EmailConfirmed = true
 				},
-				new IdentityUser
+				new ApplicationUser
 				{
 					UserName = "miki",
 					Email = "miki@fixitmedia.dk",
@@ -142,7 +143,7 @@ namespace PhotographersVideoDist.Data
 			};
 
 			// Loop through photographers and add them...
-			foreach (IdentityUser user in photographers)
+			foreach (ApplicationUser user in photographers)
 			{
 				// Ensure you have these values in your appsettings.json file...
 				var _user = await userManager.FindByEmailAsync(user.Email);

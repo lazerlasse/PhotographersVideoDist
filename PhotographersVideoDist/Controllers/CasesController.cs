@@ -22,7 +22,7 @@ namespace PhotographersVideoDist.Controllers
 {
 	public class CasesController : CaseBaseController
 	{
-		public CasesController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<IdentityUser> userManager, ILogger<CasesController> logger)
+		public CasesController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<ApplicationUser> userManager, ILogger<CasesController> logger)
 			: base(context, authorizationService, userManager, logger)
 		{
 		}
@@ -350,7 +350,7 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 
-		// Enable both Get and Post so that our jquery call can send data, and get a status
+		// POST: Cases/AssetsUpload
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Upload(int? id, List<IFormFile> files)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PhotographersVideoDist.Data;
+using PhotographersVideoDist.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace PhotographersVideoDist.Controllers
 	{
 		protected ApplicationDbContext Context { get; }
 		protected IAuthorizationService AuthorizationService { get; }
-		protected UserManager<IdentityUser> UserManager { get; }
+		protected UserManager<ApplicationUser> UserManager { get; }
 		public ILogger<CasesController> Logger { get; }
 
 
-		public CaseBaseController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<IdentityUser> userManager, ILogger<CasesController> logger)
+		public CaseBaseController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<ApplicationUser> userManager, ILogger<CasesController> logger)
 			: base()
 		{
 			Context = context;

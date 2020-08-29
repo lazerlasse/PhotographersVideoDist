@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using PhotographersVideoDist.Models;
 
 namespace PhotographersVideoDist
 {
@@ -39,6 +40,10 @@ namespace PhotographersVideoDist
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			// Add data protection service.
+			services.AddDataProtection();
+
+			// Form options for accepting large upload file size.
 			services.Configure<FormOptions>(x =>
 			{
 				x.ValueLengthLimit = int.MaxValue;
@@ -66,7 +71,7 @@ namespace PhotographersVideoDist
 
 
 			// Add identity and roles...
-			services.AddIdentity<IdentityUser, IdentityRole>(config =>
+			services.AddIdentity<ApplicationUser, IdentityRole>(config =>
 			{
 				config.SignIn.RequireConfirmedEmail = true;
 			})

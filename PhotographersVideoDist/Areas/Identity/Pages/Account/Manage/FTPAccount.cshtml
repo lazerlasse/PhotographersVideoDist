@@ -1,0 +1,45 @@
+﻿@page
+@model PhotographersVideoDist.Areas.Identity.Pages.Account.Manage.FTPAccountModel
+@{
+    Layout = "_Layout.cshtml";
+}
+@{
+    ViewData["Title"] = "FTP Konto";
+    ViewData["ActivePage"] = ManageNavPages.FTPAccount;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <h4>@ViewData["Title"]</h4>
+        <p><strong>FTP bruger oplysninger, til brug for upload af assets til eksterne systemer, som Localeyes og TV2-Øst.</strong></p>
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <form id="change-password-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.FTPUserName"></label>
+                <input asp-for="Input.FTPUserName" class="form-control" />
+                <span asp-validation-for="Input.FTPUserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.NewFTPPassword"></label>
+                <input asp-for="Input.NewFTPPassword" class="form-control" />
+                <span asp-validation-for="Input.NewFTPPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.ConfirmFTPPassword"></label>
+                <input asp-for="Input.ConfirmFTPPassword" class="form-control" />
+                <span asp-validation-for="Input.ConfirmFTPPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Gem ændringer</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

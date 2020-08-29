@@ -109,7 +109,7 @@
                         <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
 
                         <img class="full-height-width img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
-                        
+
                         @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
                         {
                             <a class="btn btn-danger" asp-action="DeleteImageAssets" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseId="@imageAssets.CaseID">Slet</a>
@@ -123,6 +123,9 @@
 </section>
 
 @section Scripts {
+    <script src="~/lib/jquery-fileupload/jquery.fileupload.js"></script>
+    <script src="~/lib/jquery-fileupload/jquery.fileupload-ui.js"></script>
+    <script src="~/lib/jquery-fileupload/jquery.iframe-transport.js"></script>
     <script type="text/javascript">
         $('#fileupload').fileupload({
             type: "post",

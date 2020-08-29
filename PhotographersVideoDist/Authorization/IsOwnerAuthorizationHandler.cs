@@ -11,9 +11,9 @@ namespace PhotographersVideoDist.Authorization
 {
 	public class IsOwnerAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Case>
 	{
-		UserManager<IdentityUser> _userManager;
+		UserManager<ApplicationUser> _userManager;
 
-		public IsOwnerAuthorizationHandler(UserManager<IdentityUser> userManager)
+		public IsOwnerAuthorizationHandler(UserManager<ApplicationUser> userManager)
 		{
 			_userManager = userManager;
 		}
