@@ -53,7 +53,7 @@ namespace PhotographersVideoDist.Data
 			{
 				new ApplicationUser
 				{
-					UserName = "Lasse",
+					UserName = "Lasse Antonsen",
 					Email = "brandmandlasse@gmail.com",
 					EmailConfirmed = true
 				},
@@ -72,7 +72,7 @@ namespace PhotographersVideoDist.Data
 					if (createUser.Succeeded)
 					{
 						// here we tie the new user to the Administrator role...
-						await userManager.AddToRoleAsync(user, "Administrator");
+						await userManager.AddToRolesAsync(user, new[] { "Administrator", "Fotograf" });
 					}
 				}
 			}
@@ -112,31 +112,25 @@ namespace PhotographersVideoDist.Data
 			{
 				new ApplicationUser
 				{
-					UserName = "fotograf",
-					Email = "fotograf@fixitmedia.dk",
-					EmailConfirmed = true,
-				},
-				new ApplicationUser
-				{
-					UserName = "dex",
+					UserName = "Micheal Dex Deleurang Pedersen",
 					Email = "michael@fixitmedia.dk",
 					EmailConfirmed = true,
 				},
 				new ApplicationUser
 				{
-					UserName = "morten",
+					UserName = "Morten Sundgaard",
 					Email = "morten@fixitmedia.dk",
 					EmailConfirmed = true
 				},
 				new ApplicationUser
 				{
-					UserName = "nicklas",
+					UserName = "Nicklas Andersson",
 					Email = "nicklas@fixitmedia.dk",
 					EmailConfirmed = true
 				},
 				new ApplicationUser
 				{
-					UserName = "miki",
+					UserName = "Miki Hedengran",
 					Email = "miki@fixitmedia.dk",
 					EmailConfirmed = true
 				}

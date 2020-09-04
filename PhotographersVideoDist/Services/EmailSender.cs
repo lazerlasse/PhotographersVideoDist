@@ -29,7 +29,7 @@ namespace PhotographersVideoDist.Services
 
 			var msg = new SendGridMessage()
 			{
-				From = new EmailAddress("noreply@fixitmedia.dk", "Photographers Video Dist"),
+				From = new EmailAddress("noreply@fixitmedia.dk", "112News Video Marked"),
 				Subject = subject,
 				PlainTextContent = message,
 				HtmlContent = message

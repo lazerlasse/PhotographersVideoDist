@@ -44,6 +44,14 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account.Manage
             public string FTPUserName { get; set; }
 
             [Required]
+            [Display(Name = "FTP Adresse")]
+            public string FTPAdress { get; set; }
+
+            [Required]
+            [Display(Name = "FTP Mappe (Hvis filer skal uploades til undermappe)")]
+            public string FTPRemoteDir { get; set; }
+
+            [Required]
             [DataType(DataType.Password)]
             [Display(Name = "FTP Password")]
             public string NewFTPPassword { get; set; }
@@ -71,10 +79,23 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account.Manage
                 plainPassword =  _dataProtector.Unprotect(encryptedPassword);
 			}
 
+			string remoteDir;
+			if (string.IsNullOrEmpty(user.FTP_RemoteDir))
+			{
+                remoteDir = "/";
+			}
+			else
+			{
+                remoteDir = user.FTP_RemoteDir;
+			}
+
             Input = new InputModel
             {
                 FTPUserName = user.FTP_UserName,
-                NewFTPPassword = plainPassword
+                FTPAdress = user.FTP_Url,
+                FTPRemoteDir = remoteDir,
+                NewFTPPassword = plainPassword,
+                ConfirmFTPPassword = plainPassword
             };
 
             return Page();
@@ -99,6 +120,18 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account.Manage
 			if (user.FTP_UserName != Input.FTPUserName)
 			{
                 user.FTP_UserName = Input.FTPUserName;
+			}
+
+			// Update FTP adress if changed.
+			if (user.FTP_Url != Input.FTPAdress)
+			{
+                user.FTP_Url = Input.FTPAdress;
+			}
+
+			// Update FTP Remote dir if changed.
+			if (user.FTP_RemoteDir != Input.FTPRemoteDir)
+			{
+                user.FTP_RemoteDir = Input.FTPRemoteDir;
 			}
 
             // Encrypt the password before save to db.

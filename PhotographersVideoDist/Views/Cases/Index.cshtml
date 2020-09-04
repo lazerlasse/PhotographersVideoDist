@@ -19,13 +19,10 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model[0].Titel)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model[0].Published)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].PhotographerID)
+                @Html.DisplayNameFor(model => model[0].Titel)
             </th>
             <th>
 
@@ -37,21 +34,24 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Titel)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Published)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Photographer.UserName)
+                    @Html.DisplayFor(modelItem => item.Titel)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.CaseID">Vis sag</a>
+                    <a asp-action="Details" asp-route-id="@item.CaseID">Detaljer</a>
 
                     @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Update)).Succeeded)
                     {
                         <br />
                         <a asp-action="Edit" asp-route-id="@item.CaseID">Rediger</a>
+                    }
+
+                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Upload)).Succeeded)
+                    {
+                        <br />
+                        <a asp-action="AssetsUpload" asp-route-id="@item.CaseID">Upload Assets</a>
                     }
 
                     @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Delete)).Succeeded)

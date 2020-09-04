@@ -21,6 +21,16 @@
         <form id="change-password-form" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
+                <label asp-for="Input.FTPAdress"></label>
+                <input asp-for="Input.FTPAdress" class="form-control" />
+                <span asp-validation-for="Input.FTPAdress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.FTPRemoteDir"></label>
+                <input asp-for="Input.FTPRemoteDir" class="form-control" />
+                <span asp-validation-for="Input.FTPRemoteDir" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Input.FTPUserName"></label>
                 <input asp-for="Input.FTPUserName" class="form-control" />
                 <span asp-validation-for="Input.FTPUserName" class="text-danger"></span>

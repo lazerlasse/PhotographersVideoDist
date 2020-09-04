@@ -22,7 +22,8 @@ namespace PhotographersVideoDist.Authorization
 			// If we're not asking for CRUD permission or approval/reject, return.
 			if (requirement.Name != Constants.CreateOperationName &&
 				requirement.Name != Constants.ReadOperationName &&
-				requirement.Name != Constants.UpdateOperationName &&
+				requirement.Name != Constants.UploadOperationName &&
+				requirement.Name != Constants.MediaProcessingOperationName &&
 				requirement.Name != Constants.IsPhotographerOperationName)
 			{
 				return Task.CompletedTask;

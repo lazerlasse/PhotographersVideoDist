@@ -35,7 +35,7 @@ namespace PhotographersVideoDist.Utilities
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 			{
 				// Generate the command line args to be executed.
-				string linuxCommandToExecute = "ffmpeg -ss 00:00:03 -i " + inputFile + " -vf fps=1/15 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
+				string linuxCommandToExecute = "ffmpeg -ss 00:00:03 -i " + inputFile + " -vf fps=1/7 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
 
 				// Run the process on Linux.
 				ProcessLinux(linuxCommandToExecute);
@@ -46,7 +46,7 @@ namespace PhotographersVideoDist.Utilities
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				// Generate the command line args to be executed.
-				string winCommandToExecute = "-ss 00:00:03 -i " + inputFile + " -vf fps=1/15 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
+				string winCommandToExecute = "-ss 00:00:03 -i " + inputFile + " -vf fps=1/7 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
 
 				// Run the process on Windows.
 				ProcessWindows(winCommandToExecute);
@@ -69,7 +69,7 @@ namespace PhotographersVideoDist.Utilities
 				StartInfo = new ProcessStartInfo()
 				{
 					CreateNoWindow = false,
-					FileName = Path.Combine(Directory.GetCurrentDirectory(), "ffmpeg-win64-2019", "bin", "ffmpeg.exe"), // Path to the ffmpeg
+					FileName = Path.Combine(Directory.GetCurrentDirectory(), "Tools", "FFmpeg-Win64", "bin", "ffmpeg.exe"), // Path to the ffmpeg
 					WindowStyle = ProcessWindowStyle.Normal,
 					Arguments = command
 				}

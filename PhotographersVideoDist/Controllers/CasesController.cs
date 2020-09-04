@@ -17,13 +17,15 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using PhotographersVideoDist.Utilities;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 namespace PhotographersVideoDist.Controllers
 {
 	public class CasesController : CaseBaseController
 	{
-		public CasesController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<ApplicationUser> userManager, ILogger<CasesController> logger)
-			: base(context, authorizationService, userManager, logger)
+		public CasesController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<ApplicationUser> userManager, IDataProtectionProvider protectionProvider, ILogger<CasesController> logger)
+			: base(context, authorizationService, userManager, protectionProvider, logger)
 		{
 		}
 
@@ -136,7 +138,7 @@ namespace PhotographersVideoDist.Controllers
 				await Context.SaveChangesAsync();
 
 				// Return to index.
-				return RedirectToPage("AssetsUpload", caseToCreate.CaseID);
+				return RedirectToAction("AssetsUpload", "Cases", new { id = caseToCreate.CaseID });
 			}
 
 			// Saving new case failed, return create view.
@@ -276,6 +278,8 @@ namespace PhotographersVideoDist.Controllers
 
 			// load case to delete.
 			var caseToDelete = await Context.Cases
+				.Include(c => c.ImageAssets)
+				.Include(c => c.VideoAssets)
 				.FirstOrDefaultAsync(c => c.CaseID == id);
 
 			// Check loaded case not null.
@@ -302,6 +306,9 @@ namespace PhotographersVideoDist.Controllers
 				ModelState.AddModelError("", "Sagen blev ikke slettet. " +
 						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 			}
+
+			// Remove assets folder and files.
+			var deleted = AssetsFileHandler.DeleteAssetsFolder(caseToDelete.CaseID, Logger);
 
 			// Return to index.
 			return RedirectToAction(nameof(Index));
@@ -350,30 +357,43 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 
-		// POST: Cases/AssetsUpload
+		// POST: Cases/AssetsUpload - Upload Action
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Upload(int? id, List<IFormFile> files)
 		{
+			// Check id not null.
 			if (id == null)
 			{
 				return new JsonResult(new { name = files.FirstOrDefault().FileName, value = "Fejlet" });
 			}
 
-			FileUpload uploads = new FileUpload
+			// Create a list of fileupload model for the files to upload.
+			IList <FileUpload> fileUploads = new List<FileUpload>();
+			foreach (IFormFile file in files)
 			{
-				AssetsFiles = files
-			};
+				fileUploads.Add(
+					new FileUpload
+					{
+						AssetsFile = file
+					});
+			}
+
+			// Check user have rights to upload files.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
+			{
+				return Forbid();
+			}
 
 			// Validate files before uploading...
-			var validatedFles = MediaFileValidator.Validate(uploads);
+			var validatedFiles = MediaFileValidator.Validate(fileUploads);
 
 			// Create new UploadFileHandler and try uploading files...
 			var UploadFileHandler = new UploadFileHandler((int)id, Logger, Context);
-			await UploadFileHandler.UploadFiles(validatedFles);
+			await UploadFileHandler.UploadFiles(validatedFiles);
 
-
-			var result = new { name = uploads.AssetsFiles.FirstOrDefault().FileName, value = "Uploaded" };
+			// Create return result.
+			var result = new { name = validatedFiles.FirstOrDefault().AssetsFile.FileName, value = validatedFiles.FirstOrDefault().UploadStatus };
 
 			// For compatibility with IE's "done" event we need to return a result as well as setting the context.response
 			return new JsonResult(result);
@@ -441,7 +461,7 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 
-		// POST: Cases/AssetsUpload - Delete VideoAssets.
+		// POST: Cases/AssetsUpload - Delete ImageAssets.
 		public async Task<IActionResult> DeleteImageAssets(int? id, int? caseId)
 		{
 			// Check id not null.
@@ -501,7 +521,109 @@ namespace PhotographersVideoDist.Controllers
 			return RedirectToAction("AssetsUpload", "Cases", new { id = caseId });
 		}
 
+		// POST: 
+		public async Task<IActionResult> Publish(int? caseID)
+		{
+			// Check case id not null...
+			if (caseID == null)
+			{
+				return NotFound();
+			}
 
+			// Load case from db.
+			var caseToPublish = await Context.Cases.FirstOrDefaultAsync(c => c.CaseID == caseID);
+
+			// Check case not null.
+			if (caseToPublish == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have rights to publish.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToPublish, AuthorizationOperations.IsOwner)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Set case state to published.
+			caseToPublish.IsPublished = true;
+
+			// Try update model async.
+			if (await TryUpdateModelAsync<Case>(
+				caseToPublish,
+				"",
+				c => c.Published))
+			{
+				// Try save changes async..
+				try
+				{
+					await Context.SaveChangesAsync();
+				}
+				catch (DbUpdateConcurrencyException)
+				{
+					//Log the error (uncomment ex variable name and write a log.)
+					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
+						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+				}
+			}
+
+			// Succeded return to index.
+			return RedirectToAction(nameof(SendFilesToFTPServer), "Cases", new { caseID = caseToPublish.CaseID });
+		}
+
+		// POST: Cases/AssetsUpload - Send Files To FTP Server
+		public async Task<IActionResult> SendFilesToFTPServer(int? caseID)
+		{
+			// Check caseID not null.
+			if (caseID == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have rights to perform action.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Load assets to upload.
+			var imageAssets = await Context.ImageAssets
+				.Where(c => c.CaseID == caseID)
+				.AsNoTracking().ToListAsync();
+
+			var videoAssets = await Context.VideoAssets
+				.Where(c => c.CaseID == caseID)
+				.AsNoTracking().ToListAsync();
+
+			// Loop through assets and make a list of path strings from loaded assets files.
+			var filesToUpload = new List<string>();
+
+			foreach (var assets in imageAssets)
+			{
+				filesToUpload.Add(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Cases", caseID.ToString(), assets.ImageFileName));
+			}
+
+			foreach (var assets in videoAssets)
+			{
+				filesToUpload.Add(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Cases", caseID.ToString(), assets.VideoAssetsFileName));
+			}
+
+
+			// Load current user.
+			var user = await UserManager.GetUserAsync(User);
+
+			// Check user not null.
+			if (user == null)
+			{
+				return NotFound();
+			}
+
+			// Upload files to FTP Server.
+			var ftpClient = new MediaFilesFTPClient(ProtectionProvider, Logger, user.FTP_UserName, user.FTP_EncryptedPassword, user.FTP_Url, user.FTP_RemoteDir);
+			await ftpClient.UploadFiles(filesToUpload);
+
+			return RedirectToAction(nameof(Index), "Cases");
+		}
 
 		//**************************************************************************//
 		//******************  Json result for autocomplete functions   *************//
@@ -545,6 +667,12 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
+			// Check user have rights to generate stills.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.MediaProcessing)).Succeeded)
+			{
+				return Forbid();
+			}
+
 			// Make a list for assets to delete if saving to db fails.
 			List<string> notSavedAssetsList = new List<string>();
 
@@ -586,13 +714,14 @@ namespace PhotographersVideoDist.Controllers
 			return RedirectToAction("AssetsUpload", "Cases", new { id = assetsFolderID });
 		}
 
+		// Save image assets to db.
 		public async Task<bool> SaveImageAssetsToDb(ImageAssets imageAssets)
 		{
 			// Try save the changes to database.
 			try
 			{
 				// Remove assets from context.
-				Context.ImageAssets.Remove(imageAssets);
+				Context.ImageAssets.Add(imageAssets);
 
 				// Save changes async.
 				await Context.SaveChangesAsync();
@@ -612,5 +741,8 @@ namespace PhotographersVideoDist.Controllers
 			// Succeded return true.
 			return true;
 		}
+
+		// Make image primary.
+
 	}
 }

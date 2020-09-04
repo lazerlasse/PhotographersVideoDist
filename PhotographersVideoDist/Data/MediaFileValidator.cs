@@ -13,21 +13,21 @@ namespace PhotographersVideoDist.Data
 	{
 		private const int ImageMinimumBytes = 512;
 
-		public static FileUpload Validate(FileUpload fileUpload)
+		public static IList<FileUpload> Validate(IList<FileUpload> fileUploads)
 		{
 			// Validate files and remove not accepted from upload.
-			foreach (var file in fileUpload.AssetsFiles)
+			foreach (var file in fileUploads)
 			{
-				var validated = ValidateMediaFile(file);
+				var validated = ValidateMediaFile(file.AssetsFile);
 
 				if (!validated)
 				{
-					fileUpload.AssetsFiles.Remove(file);
+					file.UploadStatus = "Filtype ikke tilladt";
 				}
 			}
 
 			// Return validated files.
-			return fileUpload;
+			return fileUploads;
 		}
 
 		private static bool ValidateMediaFile(IFormFile file)

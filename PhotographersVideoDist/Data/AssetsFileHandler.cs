@@ -61,7 +61,7 @@ namespace PhotographersVideoDist.Data
 				if (Directory.Exists(deletePath))
 				{
 					// Delete the folder...
-					Directory.Delete(deletePath);
+					Directory.Delete(deletePath, true);
 				}
 			}
 			catch (Exception ex)

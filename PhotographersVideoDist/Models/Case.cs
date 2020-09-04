@@ -14,7 +14,7 @@ namespace PhotographersVideoDist.Models
 		public int CaseID { get; set; }
 
 		[Display(Name = "Offentlig")]
-		public bool IsPublished { get; set; } = true;
+		public bool IsPublished { get; set; } = false;
 
 		[Required]
 		public string Titel { get; set; }

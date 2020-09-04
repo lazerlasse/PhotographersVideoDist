@@ -18,6 +18,10 @@ namespace PhotographersVideoDist.Authorization
 		  new OperationAuthorizationRequirement { Name = Constants.DeleteOperationName };
 		public static OperationAuthorizationRequirement Upload =
 		  new OperationAuthorizationRequirement { Name = Constants.UploadOperationName };
+		public static OperationAuthorizationRequirement MediaProcessing =
+		  new OperationAuthorizationRequirement { Name = Constants.MediaProcessingOperationName };
+
+
 		public static OperationAuthorizationRequirement IsAdmin =
 		  new OperationAuthorizationRequirement { Name = Constants.IsAdminOperationName };
 		public static OperationAuthorizationRequirement IsOwner =
@@ -35,6 +39,8 @@ namespace PhotographersVideoDist.Authorization
 		public static readonly string UpdateOperationName = "Update";
 		public static readonly string DeleteOperationName = "Delete";
 		public static readonly string UploadOperationName = "Upload";
+		public static readonly string MediaProcessingOperationName = "MediaProcessing";
+
 		public static readonly string IsAdminOperationName = "IsAdmin";
 		public static readonly string IsOwnerOperationName = "IsOwner";
 		public static readonly string IsPhotographerOperationName = "IsPhotographer";

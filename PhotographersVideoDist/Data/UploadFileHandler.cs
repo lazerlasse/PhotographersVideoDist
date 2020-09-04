@@ -36,10 +36,10 @@ namespace PhotographersVideoDist.Data
 			Directory.CreateDirectory(caseAssetsFolder);
 		}
 
-		public async Task<FileUpload> UploadFiles(FileUpload fileUpload)
+		public async Task<IList<FileUpload>> UploadFiles(IList<FileUpload> fileUpload)
 		{
 			// Loop through files and upload them.
-			foreach (var file in fileUpload.AssetsFiles)
+			foreach (var file in fileUpload)
 			{
 				// Try upload file and save to disk.
 				var uploaded = await Upload(file);
@@ -48,19 +48,23 @@ namespace PhotographersVideoDist.Data
 				if (uploaded)
 				{
 					// Check file exist.
-					if (File.Exists(Path.Combine(caseAssetsFolder, file.FileName)))
+					if (File.Exists(Path.Combine(caseAssetsFolder, file.AssetsFile.FileName)))
 					{
 						// Save uploaded file to database.
-						var saved = SaveUploadToDb(file);
+						var saved = SaveUploadToDb(file.AssetsFile);
 
 						// If save to db failed, delete file from disk.
 						if (!saved.Result)
 						{
-							if (!AssetsFileHandler.DeleteAssetsFile(file.FileName, _caseID, _logger))
+							if (!AssetsFileHandler.DeleteAssetsFile(file.AssetsFile.FileName, _caseID, _logger))
 							{
-								_logger.LogError("Filen blev ikke slette fra disken: " + file.FileName);
-								fileUpload.AssetsFiles.Remove(file);
+								_logger.LogError("Filen blev ikke slette fra disken: " + file.AssetsFile.FileName);
+								file.UploadStatus = "Fejlet";
 							};
+						}
+						else
+						{
+							file.UploadStatus = "Uploaded";
 						}
 					}
 				}
@@ -70,28 +74,45 @@ namespace PhotographersVideoDist.Data
 			return fileUpload;
 		}
 
-		private static async Task<bool> Upload(IFormFile file)
+		private static async Task<bool> Upload(FileUpload file)
 		{
 			// Generate full file path for the file.
-			var fullFilePath = Path.Combine(caseAssetsFolder, file.FileName);
+			var fullFilePath = Path.Combine(caseAssetsFolder, file.AssetsFile.FileName);
 
-			// Save file to disk.
-			try
+			if (!File.Exists(fullFilePath))
 			{
-				using var fileStream = new FileStream(fullFilePath, FileMode.Create);
-				await file.CopyToAsync(fileStream);
+				// Save file to disk.
+				try
+				{
+					using var fileStream = new FileStream(fullFilePath, FileMode.Create);
+					await file.AssetsFile.CopyToAsync(fileStream);
+					_logger.LogInformation("Filen blev gemt med succes. " + Path.GetFileName(fullFilePath));
+				}
+				catch (Exception ex)
+				{
+					// Send error to logger..
+					_logger.LogError("Filen kunne ikke uploades: " + ex.Message);
+
+					// Set FileUpload status message.
+					file.UploadStatus = "Fejlet";
+
+					// Upload failed, return false.
+					return false;
+				}
+
+				return true;
 			}
-			catch (Exception ex)
+			else
 			{
-				// Send error to logger..
-				_logger.LogError("Filen kunne ikke uploades: " + ex.Message);
+				// Log information.
+				_logger.LogInformation("Filen blev ikke uploaded, da den allerede er uploadet! " + file.AssetsFile.FileName);
 
-				// Upload failed, return false.
+				// Set FileUpload status message.
+				file.UploadStatus = "Allerede Uploaded";
+
+				// Return true succeded.
 				return false;
 			}
-
-			// Return true succeded.
-			return true;
 		}
 
 		private async Task<bool> SaveUploadToDb(IFormFile file)
@@ -115,10 +136,11 @@ namespace PhotographersVideoDist.Data
 				{
 					_context.ImageAssets.Add(image);
 					await _context.SaveChangesAsync();
+					_logger.LogInformation("ImageAssets ID: " + image.ImageAssetsID + " Filnavn: " + image.ImageFileName + " blev gemt i databasen med succes.");
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError("Kunne ikke gemme billedet i databasen! " + ex.Message);
+					_logger.LogError("Kunne ikke gemme billedet i databasen! Filnavn: " + image.ImageFileName + " Meddelelse: " + ex.Message);
 					return false;
 				}
 			}
@@ -143,10 +165,11 @@ namespace PhotographersVideoDist.Data
 					{
 						_context.VideoAssets.Add(video);
 						await _context.SaveChangesAsync();
+						_logger.LogInformation("VideoAssets ID: " + video.VideoAssetsID + " Filnavn: " + video.VideoAssetsFileName + " blev gemt i databasen med succes.");
 					}
 					catch (Exception ex)
 					{
-						_logger.LogError("Videoen blev ikke gemt i databasen: " + ex.Message);
+						_logger.LogError("Videoen blev ikke gemt i databasen: Filnavn: " + video.VideoAssetsFileName + " Meddelese: " + ex.Message);
 						return false;
 					}
 				}

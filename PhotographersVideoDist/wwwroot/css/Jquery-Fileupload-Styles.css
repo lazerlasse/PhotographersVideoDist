@@ -1,0 +1,50 @@
+﻿/* File Upload Style Section */
+.file {
+	position: relative;
+	background: linear-gradient(to right, lightblue 50%, transparent 50%);
+	background-size: 200% 100%;
+	background-position: right bottom;
+	transition: all 1s ease;
+}
+
+	.file.done {
+		background: lightgreen;
+	}
+
+	.file a {
+		display: block;
+		position: relative;
+		padding: 5px;
+		color: black;
+	}
+
+.bar {
+	height: 18px;
+	background: green;
+}
+
+.fileinput-button {
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+}
+
+	.fileinput-button input {
+		position: absolute;
+		top: 0;
+		right: 0;
+		margin: 0;
+		height: 100%;
+		opacity: 0;
+		filter: alpha(opacity=0);
+		font-size: 200px !important;
+		direction: ltr;
+		cursor: pointer;
+	}
+
+/* Fixes for IE < 8 */
+@media screen\9 {
+	.fileinput-button input {
+		font-size: 150% !important;
+	}
+}

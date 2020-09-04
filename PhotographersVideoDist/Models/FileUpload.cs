@@ -9,7 +9,10 @@ namespace PhotographersVideoDist.Models
 {
 	public class FileUpload
 	{
-		[Display(Name = "Vælg filer")]
-		public ICollection<IFormFile> AssetsFiles { get; set; }
+		[Display(Name = "Upload Status")]
+		public string UploadStatus { get; set; }
+
+		[Display(Name = "Assets fil")]
+		public IFormFile AssetsFile { get; set; }
 	}
 }

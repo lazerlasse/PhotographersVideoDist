@@ -167,6 +167,12 @@ namespace PhotographersVideoDist.Migrations
                     b.Property<string>("FTP_EncryptedPassword")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<string>("FTP_RemoteDir")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("FTP_Url")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<string>("FTP_UserName")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
