@@ -98,7 +98,7 @@ namespace PhotographersVideoDist.Utilities
 					CreateNoWindow = false,
 					FileName = "/bin/bash",
 					WindowStyle = ProcessWindowStyle.Normal,
-					Arguments = command
+					Arguments = $"-c \"{command}\""
 				}
 			};
 
