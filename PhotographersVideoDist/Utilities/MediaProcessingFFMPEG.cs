@@ -98,7 +98,9 @@ namespace PhotographersVideoDist.Utilities
 					CreateNoWindow = false,
 					FileName = "/bin/bash",
 					WindowStyle = ProcessWindowStyle.Normal,
-					Arguments = $"-c \"{command}\""
+					Arguments = $"-c \"{command}\"",
+					RedirectStandardOutput = true,
+					RedirectStandardError = true
 				}
 			};
 
@@ -106,6 +108,8 @@ namespace PhotographersVideoDist.Utilities
 			try
 			{
 				linuxProcess.Start();
+				_logger.LogInformation(linuxProcess.StandardOutput.ReadToEnd());
+				_logger.LogError(linuxProcess.StandardError.ReadToEnd());
 				linuxProcess.WaitForExit(300000); // wait for exit 10000 miliseconds
 			}
 			catch (Exception ex)
