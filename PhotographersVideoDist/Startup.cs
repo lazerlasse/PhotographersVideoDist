@@ -112,7 +112,10 @@ namespace PhotographersVideoDist
 
 			// Configure Email Support for confirmation and password recovery...
 			services.AddTransient<IEmailSender, EmailSender>();
-			services.Configure<AuthMessageSenderOptions>(Configuration);
+			services.Configure<AuthMessageSenderOptions>(authMessageSenderOptions => 
+			{
+				authMessageSenderOptions.SendGridKey = Environment.GetEnvironmentVariable("SendGridKey");
+			});
 
 
 			// Configure MVC options...

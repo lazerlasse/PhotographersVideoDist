@@ -345,7 +345,7 @@ namespace PhotographersVideoDist.Controllers
 			}
 
 			// Authenticate user have upload rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, caseForUpload.Case, AuthorizationOperations.Create)).Succeeded)
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseForUpload.Case, AuthorizationOperations.IsOwner)).Succeeded)
 			{
 				return Forbid();
 			}

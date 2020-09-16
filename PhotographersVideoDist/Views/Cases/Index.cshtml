@@ -48,7 +48,7 @@
                         <a asp-action="Edit" asp-route-id="@item.CaseID">Rediger</a>
                     }
 
-                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Upload)).Succeeded)
+                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.IsOwner)).Succeeded)
                     {
                         <br />
                         <a asp-action="AssetsUpload" asp-route-id="@item.CaseID">Upload Assets</a>
