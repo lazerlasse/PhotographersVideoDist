@@ -19,6 +19,7 @@ using System.Net;
 using PhotographersVideoDist.Utilities;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
+using Microsoft.VisualBasic;
 
 namespace PhotographersVideoDist.Controllers
 {
@@ -84,18 +85,60 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 		// GET: Cases/Create
-		public async Task<IActionResult> CreateAsync()
+		public async Task<IActionResult> CreateAsync(int? caseID)
 		{
-			// Create new case and set DateTime to now.
-			var caseToCreate = new Case()
-			{
-				Published = DateTime.Now
-			};
+			CreateViewModel caseToCreate = new CreateViewModel();
 
-			// Check current user have create rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Create)).Succeeded)
+			// Check to create new case or load existing.
+			if (caseID == null)
 			{
-				return Forbid();
+				// Create new case and set DateTime to now.
+				caseToCreate.Case = new Case()
+				{
+					PhotographerID = UserManager.GetUserId(User),
+					VideoAssets = new List<VideoAssets>(),
+					ImageAssets = new List<ImageAssets>()
+				};
+
+				// Check current user have create rights.
+				if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate.Case, AuthorizationOperations.Create)).Succeeded)
+				{
+					return Forbid();
+				}
+
+				// Try to save the new case to get the caseId.
+				try
+				{
+					Context.Cases.Add(caseToCreate.Case);
+					await Context.SaveChangesAsync();
+				}
+				catch (DbUpdateConcurrencyException ex)
+				{
+					Logger.LogError("Der skete en fejl i forsøget på at oprette ny sag i databasen: " + ex.Message);
+					ModelState.AddModelError("", "Kunne ikke oprette ny sag i databasen! " +
+						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+				}
+			}
+			else
+			{
+				caseToCreate.Case = await Context.Cases
+					.Include(c => c.Photographer)
+					.Include(c => c.Postal)
+					.Include(c => c.ImageAssets)
+					.Include(c => c.VideoAssets)
+					.AsNoTracking()
+					.FirstOrDefaultAsync(c => c.CaseID == caseID);
+
+				if (caseToCreate == null)
+				{
+					Logger.LogWarning("GET: Cases/CreateAsync - Sagen blev ikke fundet eller kunne ikke indlæses!");
+					return NotFound();
+				}
+
+				if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate.Case, AuthorizationOperations.Create)).Succeeded)
+				{
+					return Forbid();
+				}
 			}
 
 			// Return View with new case.
@@ -103,29 +146,46 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 		// POST: Cases/Create
-		// To protect from overposting attacks, enable the specific properties you want to bind to, for 
-		// more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-		[HttpPost]
+		[HttpPost, ActionName("Create")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("CaseID,Titel,Details,Comments,Street,Published")] Case caseToCreate, [Bind("PostalCode,Town")] Postal postal)
+		public async Task<IActionResult> SaveCaseAsync(int? caseID)
 		{
-			if (ModelState.IsValid)
+			// Check id not null.
+			if (caseID == null)
 			{
-				// Check user have create rights.
-				if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Create)).Succeeded)
-				{
-					return Forbid();
-				}
+				return NotFound();
+			}
 
-				// Set current user as photographer.
-				caseToCreate.PhotographerID = UserManager.GetUserId(User);
+			// Load case to update from db.
+			var caseToCreate = await Context.Cases
+				.Include(p => p.Photographer)
+				.Include(p => p.Postal)
+				.FirstOrDefaultAsync(c => c.CaseID == caseID);
 
+			// Check loaded case not null.
+			if (caseToCreate == null)
+			{
+				return NotFound();
+			}
+
+			// Validate current user have update rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToCreate, AuthorizationOperations.Update)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Try update model async.
+			if (await TryUpdateModelAsync<Case>(
+				caseToCreate,
+				"",
+				c => c.CaseID, c => c.Titel, c => c.Details, c => c.Comments, c => c.Street, c => c.PostalCode))
+			{
 				// Check and update Town and Postalcode.
-				if (postal.PostalCode == null && postal.Town != null)
+				if (caseToCreate.PostalCode == null && caseToCreate.Postal.Town != null)
 				{
 					var postalResult = await Context.Postals
 						.AsNoTracking()
-						.FirstOrDefaultAsync(p => p.Town.ToLower().Contains(postal.Town.ToLower()));
+						.FirstOrDefaultAsync(p => p.Town.ToLower().Contains(caseToCreate.Postal.Town.ToLower()));
 
 					if (postalResult != null)
 					{
@@ -133,12 +193,20 @@ namespace PhotographersVideoDist.Controllers
 					}
 				}
 
-				// Add the case to data context and save async.
-				Context.Add(caseToCreate);
-				await Context.SaveChangesAsync();
+				// Try save changes async..
+				try
+				{
+					await Context.SaveChangesAsync();
+				}
+				catch (DbUpdateConcurrencyException ex)
+				{
+					Logger.LogError("Ændringer i ny sag blev ikke gemt: " + ex.Message);
+					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
+						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+				}
 
-				// Return to index.
-				return RedirectToAction("AssetsUpload", "Cases", new { id = caseToCreate.CaseID });
+				// Succeded return to create view.
+				return RedirectToAction("Create", "Cases", new { caseID = caseToCreate.CaseID });
 			}
 
 			// Saving new case failed, return create view.
@@ -146,7 +214,7 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 		// GET: Cases/Edit/5
-		public async Task<IActionResult> Edit(int? id)
+		public async Task<IActionResult> EditAsync(int? id)
 		{
 			// Check id not null.
 			if (id == null)
@@ -181,7 +249,7 @@ namespace PhotographersVideoDist.Controllers
 		// more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost, ActionName("Edit")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditCase(int? id)
+		public async Task<IActionResult> EditCaseAsync(int? id)
 		{
 			// Check id not null.
 			if (id == null)
@@ -369,7 +437,7 @@ namespace PhotographersVideoDist.Controllers
 			}
 
 			// Create a list of fileupload model for the files to upload.
-			IList <FileUpload> fileUploads = new List<FileUpload>();
+			IList<FileUpload> fileUploads = new List<FileUpload>();
 			foreach (IFormFile file in files)
 			{
 				fileUploads.Add(

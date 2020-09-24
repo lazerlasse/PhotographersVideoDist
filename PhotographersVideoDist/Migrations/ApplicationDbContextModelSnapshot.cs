@@ -230,8 +230,10 @@ namespace PhotographersVideoDist.Migrations
                     b.Property<string>("Comments")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Details")
-                        .IsRequired()
                         .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
                         .HasMaxLength(200);
 
@@ -245,14 +247,13 @@ namespace PhotographersVideoDist.Migrations
                         .HasColumnType("varchar(4) CHARACTER SET utf8mb4")
                         .HasMaxLength(4);
 
-                    b.Property<DateTime>("Published")
+                    b.Property<DateTime?>("Published")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Street")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Titel")
-                        .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("CaseID");

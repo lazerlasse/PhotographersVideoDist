@@ -13,13 +13,13 @@ namespace PhotographersVideoDist.Models
 		[Key]
 		public int CaseID { get; set; }
 
-		[Display(Name = "Offentlig")]
+		[Display(Name = "Udgivet")]
 		public bool IsPublished { get; set; } = false;
 
-		[Required]
+		[Display(Name = "Overskrift")]
 		public string Titel { get; set; }
 
-		[Required, Display(Name = "Detaljer"), MaxLength(200)]
+		[Display(Name = "Detaljer"), MaxLength(200)]
 		public string Details { get; set; }
 
 		[Display(Name = "Kommentar/Bemærkninger")]
@@ -30,14 +30,19 @@ namespace PhotographersVideoDist.Models
 
 
 		// Navigation Properties for Postalcode and Town.
-		[ForeignKey("Postal"), MaxLength(4), MinLength(4)]
+		[ForeignKey("Postal"), MaxLength(4)]
 		public string PostalCode { get; set; }		// FK For Postal.
 		public Postal Postal { get; set; }      // Navigation Property For Postal.
 
 
+		[DataType(DataType.DateTime), Display(Name = "Oprettet")]
+		[DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:MM}", ApplyFormatInEditMode = true)]
+		public DateTime Created { get; set; } = DateTime.Now;
+
+
 		[DataType(DataType.DateTime), Display(Name = "Udgivet")]
-		[DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:MM}", ApplyFormatInEditMode = true)]
-		public DateTime Published { get; set; } = DateTime.Now;
+		[DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:MM}", ApplyFormatInEditMode = true)]
+		public DateTime? Published { get; set; }
 		
 
 		// Navigation Properties for IdentityUser (Photographer).
