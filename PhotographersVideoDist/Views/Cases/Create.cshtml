@@ -1,17 +1,21 @@
-﻿@model PhotographersVideoDist.Models.CreateViewModel
+﻿@model PhotographersVideoDist.Models.CasesViewModel
 
 @{
     ViewData["Title"] = "Opret sag";
 }
 
-<h1>Opret sag</h1>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>Opret sag: @Model.Case.CaseID</h1>
+        <hr />
+    </div>
+</div>
 
-<hr />
 <form id="createForm" asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input name="CaseID" type="hidden" asp-for="Case.CaseID" />
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.Titel" class="control-label"></label>
                 <input name="Titel" asp-for="Case.Titel" class="form-control" />
@@ -32,7 +36,7 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="form-group" id="locationField">
                 <h4 class="control-label">Find adresse</h4>
                 <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" placeholder="Skriv adresse" />
@@ -42,7 +46,7 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.Street" class="control-label"></label>
                 <input name="Street" asp-for="Case.Street" class="form-control" id="route" />
@@ -52,14 +56,14 @@
     </div>
 
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-md-3 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.PostalCode" class="control-label"></label>
                 <input name="PostalCode" asp-for="Case.PostalCode" class="form-control" id="postal_code" onfocus="findPostal()" />
                 <span asp-validation-for="Case.PostalCode" class="text-danger"></span>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="form-group">
                 <label asp-for="Case.Postal.Town" class="control-label"></label>
                 <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" />
@@ -74,9 +78,9 @@
     <form id="uploadForm" enctype="multipart/form-data" asp-action="/Cases/Upload">
         <input id="routevalue" name="id" type="hidden" value="@Model.Case.CaseID" />
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8 offset-md-2 text-md-center">
                 <hr />
-                <span class="btn btn-success fileinput-button">
+                <span class="btn btn-success fileinput-button w-75">
                     <span>Tilføj Assets</span>
                     <input id="fileupload" name="files" type="file" multiple />
                 </span>
@@ -84,7 +88,7 @@
         </div>
     </form>
     <div class="row d-none" id="progressRow">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <hr />
             <div id="overallProgress" class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
@@ -93,7 +97,7 @@
         </div>
     </div>
     <div class="row d-none" id="filelistholderRow">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="well" id="filelistholder"></div>
         </div>
         <hr />
@@ -101,77 +105,83 @@
 }
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8 offset-md-2 text-md-center">
         <hr />
-        <input type="submit" value="Gem" form="createForm" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Cases" class="btn btn-primary">Fortryd</a>
+        <input class="btn btn-primary" type="submit" value="Gem" form="createForm" />
         <a class="btn btn-primary" asp-action="Publish" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID">Udgiv</a>
-        <hr />
+        <a class="btn btn-danger" asp-action="Delete" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID">Fortryd</a>
     </div>
 </div>
 
-<table class="table">
-    <thead title="Video Assets">
-        <tr class="row">
-            <th class="offset-md-2 col-md-8">
-                <label>Video Assets</label>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var videoAssets in Model.Case.VideoAssets)
-        {
+@if (Model.Case.VideoAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Video Assets">
             <tr class="row">
-                <td class=" offset-md-2 col-md-8">
-                    <p><span>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)</span><p>
-                    <p><span>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</span></p>
-                    <video class="assets-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
-                    <div>
-                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.MediaProcessing)).Succeeded)
-                        {
-                            <a class="btn btn-primary" asp-action="GenerateStillsFromVideo" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.Case.CaseID">Auto Stills</a>
-                        }
-                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.Delete)).Succeeded)
-                        {
-                            <a class="btn alert-danger" asp-action="DeleteVideoAssets" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseId="@videoAssets.CaseID">Slet</a>
-                        }
-                    </div>
-                </td>
+                <th class="offset-md-2 col-md-8">
+                    <label>Video Assets</label>
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var videoAssets in Model.Case.VideoAssets)
+            {
+                <tr class="row">
+                    <td class=" offset-md-2 col-md-8">
+                        <p><span>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)</span><p>
+                        <p><span>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</span></p>
+                        <video class="assets-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
+                        <div>
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.MediaProcessing)).Succeeded)
+                            {
+                                <a class="btn btn-primary" asp-action="CreateViewAutoStills" asp-controller="Cases" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.Case.CaseID">Auto Stills</a>
+                            }
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.Delete)).Succeeded)
+                            {
+                                <a class="btn alert-danger" asp-action="DeleteVideoAssetsCreateView" asp-controller="Cases" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseID="@videoAssets.CaseID">Slet</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-<hr />
 
-<table class="table">
-    <thead title="Billede Assets">
-        <tr class="row">
-            <th class="offset-md-2 col-md-8">
-                <label>Image Assets</label>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var imageAssets in Model.Case.ImageAssets)
-        {
+@if (Model.Case.ImageAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Billede Assets">
             <tr class="row">
-                <td class="offset-md-2 col-md-8">
-                    <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</span></p>
-                    <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
-
-                    <img class="assets-size img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
-
-                    @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
-                    {
-                        <a class="btn btn-danger" asp-action="DeleteImageAssets" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseId="@imageAssets.CaseID">Slet</a>
-                        <input asp-for="@imageAssets.ImageIsPrimary" />
-                    }
-                </td>
+                <th class="offset-md-2 col-md-8">
+                    <label>Image Assets</label>
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var imageAssets in Model.Case.ImageAssets)
+            {
+                <tr class="row">
+                    <td class="offset-md-2 col-md-8">
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</span></p>
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
+
+                        <img class="assets-size img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
+
+                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
+                        {
+                            <a class="btn btn-danger" asp-action="DeleteImageAssetsCreateView" asp-controller="Cases" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseID="@imageAssets.CaseID">Slet</a>
+                            <input asp-for="@imageAssets.ImageIsPrimary" />
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 
 @section Scripts {

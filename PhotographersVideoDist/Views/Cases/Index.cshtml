@@ -6,18 +6,21 @@
 
 <h1>Sags oversigt</h1>
 
+<hr />
+
 @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Create)).Succeeded)
 {
     <p>
-        <a asp-action="Create">Opret ny sag</a>
+        <a class="btn badge-primary" asp-action="Create" asp-controller="Cases">Opret sag</a>
     </p>
 }
-
-<hr />
 
 <table class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Created)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model[0].Published)
             </th>
@@ -25,7 +28,7 @@
                 @Html.DisplayNameFor(model => model[0].Titel)
             </th>
             <th>
-
+                Handlinger
             </th>
         </tr>
     </thead>
@@ -34,30 +37,27 @@
         {
             <tr>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Created)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Published)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Titel)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.CaseID">Detaljer</a>
+                    <a asp-action="Details" asp-controller="Cases" asp-route-caseID="@item.CaseID">Vis</a>
 
                     @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Update)).Succeeded)
                     {
                         <br />
-                        <a asp-action="Edit" asp-route-id="@item.CaseID">Rediger</a>
-                    }
-
-                    @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.IsOwner)).Succeeded)
-                    {
-                        <br />
-                        <a asp-action="AssetsUpload" asp-route-id="@item.CaseID">Upload Assets</a>
+                        <a asp-action="Edit" asp-controller="Cases" asp-route-caseID="@item.CaseID">Rediger</a>
                     }
 
                     @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.Delete)).Succeeded)
                     {
                         <br />
-                        <a asp-action="Delete" asp-route-id="@item.CaseID">Slet</a>
+                        <a asp-action="Delete" asp-controller="Cases" asp-route-caseID="@item.CaseID">Slet</a>
                     }
                 </td>
             </tr>

@@ -157,9 +157,8 @@ namespace PhotographersVideoDist.Data
 				};
 
 				// Check if already exist.
-				if (!await _context.VideoAssets.Where(v => v.VideoAssetsFileName == video.VideoAssetsFileName).AnyAsync())
+				if (!await _context.VideoAssets.Where(v => v.VideoAssetsFileName == video.VideoAssetsFileName).Where(v => v.CaseID == video.CaseID).AnyAsync())
 				{
-
 					// Save content to the database.
 					try
 					{
@@ -173,7 +172,6 @@ namespace PhotographersVideoDist.Data
 						return false;
 					}
 				}
-
 			}
 
 			// Save assets to db succeded, return true.

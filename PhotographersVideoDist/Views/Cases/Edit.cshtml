@@ -1,89 +1,238 @@
-﻿@model PhotographersVideoDist.Models.Case
+﻿@model PhotographersVideoDist.Models.CasesViewModel
 
 @{
     ViewData["Title"] = "Rediger sag";
 }
 
-<h1>Rediger</h1>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>Rediger Sag: @Model.Case.CaseID</h1>
 
-<h4>Sags nr. @Model.CaseID</h4>
-<hr />
-<form asp-action="Edit">
+        <hr />
+    </div>
+</div>
+
+<form id="editForm" asp-action="Edit" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="hidden" asp-for="CaseID" />
+    <input name="CaseID" type="hidden" asp-for="Case.CaseID" />
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="form-group">
-                <label asp-for="Titel" class="control-label"></label>
-                <input asp-for="Titel" class="form-control" />
-                <span asp-validation-for="Titel" class="text-danger"></span>
+                <label asp-for="Case.Titel" class="control-label"></label>
+                <input name="Titel" asp-for="Case.Titel" class="form-control" />
+                <span asp-validation-for="Case.Titel" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Details" class="control-label"></label>
-                <textarea asp-for="Details" class="form-control" rows="5"></textarea>
-                <span asp-validation-for="Details" class="text-danger"></span>
+                <label asp-for="Case.Details" class="control-label"></label>
+                <textarea name="Details" asp-for="Case.Details" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Case.Details" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Comments" class="control-label"></label>
-                <input asp-for="Comments" class="form-control" />
-                <span asp-validation-for="Comments" class="text-danger"></span>
+                <label asp-for="Case.Comments" class="control-label"></label>
+                <input name="Comments" asp-for="Case.Comments" class="form-control" />
+                <span asp-validation-for="Case.Comments" class="text-danger"></span>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8 offset-md-2">
             <div class="form-group">
-                <label asp-for="Street" class="control-label"></label>
-                <input asp-for="Street" class="form-control" id="route" />
-                <span asp-validation-for="Street" class="text-danger"></span>
+                <label asp-for="Case.Street" class="control-label"></label>
+                <input name="Street" asp-for="Case.Street" class="form-control" id="route" />
+                <span asp-validation-for="Case.Street" class="text-danger"></span>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-md-3 offset-md-2">
             <div class="form-group">
-                <label asp-for="Postal.PostalCode" class="control-label"></label>
-                <input asp-for="PostalCode" type="number" class="form-control" id="postal_code" onfocus="findPostal()"/>
-                <span asp-validation-for="PostalCode" class="text-danger"></span>
+                <label asp-for="Case.PostalCode" class="control-label"></label>
+                <input name="PostalCode" asp-for="Case.PostalCode" type="number" class="form-control" id="postal_code" onfocus="findPostal()" />
+                <span asp-validation-for="Case.PostalCode" class="text-danger"></span>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="form-group">
-                <label asp-for="Postal.Town" class="control-label"></label>
-                <input asp-for="Postal.Town" class="form-control" id="locality" onfocus="findCity()"/>
-                <span asp-validation-for="Postal.Town" class="text-danger"></span>
+                <label asp-for="Case.Postal.Town" class="control-label"></label>
+                <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" />
+                <span asp-validation-for="Case.Postal.Town" class="text-danger"></span>
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label asp-for="Published" class="control-label"></label>
-                <input asp-for="Published" class="form-control" type="datetime" readonly />
-            </div>
-            <div class="form-group">
-                <label asp-for="PhotographerID" class="control-label"></label>
-                <input asp-for="Photographer.UserName" class="form-control" readonly />
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 text-md-center">
-            <hr />
-            <input type="submit" value="Gem" class="btn btn-primary" />
-            <a asp-action="Index" class="btn btn-primary">Tilbage</a>
-            <a asp-action="AssetsUpload" class="btn btn-primary" asp-route-id="@Model.CaseID">Upload Assets</a>
-            <hr />
         </div>
     </div>
 </form>
 
+@if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
+{
+    <form id="uploadForm" enctype="multipart/form-data" asp-action="/Cases/Upload">
+        <input id="routevalue" name="id" type="hidden" value="@Model.Case.CaseID" />
+        <div class="row">
+            <div class="col-md-8 offset-md-2 text-md-center">
+                <hr />
+                <span class="btn btn-success fileinput-button w-75">
+                    <span>Tilføj Assets</span>
+                    <input id="fileupload" name="files" type="file" multiple />
+                </span>
+            </div>
+        </div>
+    </form>
+    <div class="row d-none" id="progressRow">
+        <div class="col-md-8 offset-md-2">
+            <hr />
+            <div id="overallProgress" class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+            </div>
+            <hr />
+        </div>
+    </div>
+    <div class="row d-none" id="filelistholderRow">
+        <div class="col-md-8 offset-md-2">
+            <div class="well" id="filelistholder"></div>
+        </div>
+        <hr />
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2 text-md-center">
+        <hr />
+        <input type="submit" form="editForm" value="Gem" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-primary">Oversigt</a>
+        @if (!Model.Case.IsPublished)
+        {
+            <a class="btn btn-primary" asp-action="Publish" asp-route-caseID="@Model.Case.CaseID">Udgiv</a>
+        }
+        else
+        {
+            <a class="btn btn-primary" asp-action="SendFilesToFTPServer" asp-route-caseID="@Model.Case.CaseID">Send igen</a>
+        }
+        <a class="btn btn-danger" asp-action="Delete" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID">Slet</a>
+    </div>
+</div>
+
+
+@if (Model.Case.VideoAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Video Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <label>Video Assets</label>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var videoAssets in Model.Case.VideoAssets)
+            {
+                <tr class="row">
+                    <td class=" offset-md-2 col-md-8">
+                        <p><span>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)</span><p>
+                        <p><span>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</span></p>
+                        <video class="assets-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
+                        <div>
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.MediaProcessing)).Succeeded)
+                            {
+                                <a class="btn btn-primary" asp-action="EditViewAutoStills" asp-controller="Cases" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.Case.CaseID">Auto Stills</a>
+                            }
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.Delete)).Succeeded)
+                            {
+                                <a class="btn alert-danger" asp-action="DeleteVideoAssetsEditView" asp-controller="Cases" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseID="@videoAssets.CaseID">Slet</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@if (Model.Case.ImageAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Billede Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <label>Image Assets</label>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var imageAssets in Model.Case.ImageAssets)
+            {
+                <tr class="row">
+                    <td class="offset-md-2 col-md-8">
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</span></p>
+                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
+
+                        <img class="assets-size img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
+
+                        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
+                        {
+                            <a class="btn btn-danger" asp-action="DeleteImageAssetsEditView" asp-controller="Cases" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseID="@imageAssets.CaseID">Slet</a>
+                            <input asp-for="@imageAssets.ImageIsPrimary" />
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 
 @section Scripts {
     <script src="~/js/Cities-Autocomplete.js"></script>
+    <script src="~/lib/jquery-fileupload/jquery.fileupload.js"></script>
+    <script src="~/lib/jquery-fileupload/jquery.fileupload-ui.js"></script>
+    <script src="~/lib/jquery-fileupload/jquery.iframe-transport.js"></script>
+    <script type="text/javascript">
+        var filesCount = 0, filesUploaded = 0;
+
+        $('#fileupload').fileupload({
+            type: "post",
+            dataType: "json",
+            url: "/Cases/Upload",
+            limitConcurrentUploads: 1,
+            sequentialUploads: true,
+            progressInterval: 100,
+            add: function (e, data) {
+                filesCount++;
+                $('#progressRow').removeClass('d-none');
+                $('#filelistholderRow').removeClass('d-none');
+                data.context = $('<div />').text(data.files[0].name).appendTo('#filelistholder');
+                $('</div><div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div></div>').appendTo(data.context);
+                data.submit();
+            },
+            done: function (e, data) {
+                filesUploaded++;
+                data.context.text(data.files[0].name + " - " + data.result.value);
+
+                if (filesUploaded === filesCount) {
+                    $('#editForm').submit();
+                }
+            },
+            fail: function (e, data) {
+                filesUploaded++;
+                data.context.text(data.files[0].name + " - " + data.jqXHR.statusText);
+
+                if (filesUploaded === filesCount) {
+                    $('#editForm').submit();
+                }
+            },
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#overallProgress .progress-bar').css(
+                    'width',
+                    progress + '%'
+                );
+            },
+            progress: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                data.context.find('.progress-bar').css('width', progress + '%');
+            }
+        });
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

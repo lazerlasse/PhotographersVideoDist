@@ -43,20 +43,21 @@ namespace PhotographersVideoDist.Controllers
 			var cases = Context.Cases
 				.Include(p => p.Photographer)
 				.Include(p => p.Postal)
-				.AsNoTracking();
+				.AsNoTracking()
+				.Where(c => c.PhotographerID == UserManager.GetUserId(User));
 
 			// Set page size.
-			int pageSize = 3;
+			int pageSize = 10;
 
 			// Return View and load content async.
 			return View(await PaginatedList<Case>.CreateAsync(cases, pageNumber ?? 1, pageSize));
 		}
 
 		// GET: Cases/Details/5
-		public async Task<IActionResult> Details(int? id)
+		public async Task<IActionResult> Details(int? caseID)
 		{
 			// Check id not null.
-			if (id == null)
+			if (caseID == null)
 			{
 				return NotFound();
 			}
@@ -66,7 +67,7 @@ namespace PhotographersVideoDist.Controllers
 				.Include(p => p.Photographer)
 				.Include(p => p.Postal)
 				.AsNoTracking()
-				.FirstOrDefaultAsync(c => c.CaseID == id);
+				.FirstOrDefaultAsync(c => c.CaseID == caseID);
 
 			// Check loaded case not null.
 			if (caseToView == null)
@@ -87,17 +88,18 @@ namespace PhotographersVideoDist.Controllers
 		// GET: Cases/Create
 		public async Task<IActionResult> CreateAsync(int? caseID)
 		{
-			CreateViewModel caseToCreate = new CreateViewModel();
-
 			// Check to create new case or load existing.
 			if (caseID == null)
 			{
 				// Create new case and set DateTime to now.
-				caseToCreate.Case = new Case()
+				var caseToCreate = new CasesViewModel()
 				{
-					PhotographerID = UserManager.GetUserId(User),
-					VideoAssets = new List<VideoAssets>(),
-					ImageAssets = new List<ImageAssets>()
+					Case = new Case()
+					{
+						PhotographerID = UserManager.GetUserId(User),
+						VideoAssets = new List<VideoAssets>(),
+						ImageAssets = new List<ImageAssets>()
+					}
 				};
 
 				// Check current user have create rights.
@@ -118,18 +120,24 @@ namespace PhotographersVideoDist.Controllers
 					ModelState.AddModelError("", "Kunne ikke oprette ny sag i databasen! " +
 						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 				}
+
+				// Return View with new case.
+				return View(caseToCreate);
 			}
 			else
 			{
-				caseToCreate.Case = await Context.Cases
-					.Include(c => c.Photographer)
-					.Include(c => c.Postal)
-					.Include(c => c.ImageAssets)
-					.Include(c => c.VideoAssets)
-					.AsNoTracking()
-					.FirstOrDefaultAsync(c => c.CaseID == caseID);
+				var caseToCreate = new CasesViewModel()
+				{
+					Case = await Context.Cases
+						.Include(c => c.Photographer)
+						.Include(c => c.Postal)
+						.Include(c => c.ImageAssets)
+						.Include(c => c.VideoAssets)
+						.AsNoTracking()
+						.FirstOrDefaultAsync(c => c.CaseID == caseID)
+				};
 
-				if (caseToCreate == null)
+				if (caseToCreate.Case == null)
 				{
 					Logger.LogWarning("GET: Cases/CreateAsync - Sagen blev ikke fundet eller kunne ikke indlæses!");
 					return NotFound();
@@ -139,10 +147,10 @@ namespace PhotographersVideoDist.Controllers
 				{
 					return Forbid();
 				}
-			}
 
-			// Return View with new case.
-			return View(caseToCreate);
+				// Return View with new case.
+				return View(caseToCreate);
+			}
 		}
 
 		// POST: Cases/Create
@@ -214,28 +222,33 @@ namespace PhotographersVideoDist.Controllers
 		}
 
 		// GET: Cases/Edit/5
-		public async Task<IActionResult> EditAsync(int? id)
+		public async Task<IActionResult> EditAsync(int? caseID)
 		{
 			// Check id not null.
-			if (id == null)
+			if (caseID == null)
 			{
 				return NotFound();
 			}
 
 			// Load case to edit.
-			var caseToEdit = await Context.Cases
-				.Include(p => p.Photographer)
-				.Include(p => p.Postal)
-				.FirstOrDefaultAsync(c => c.CaseID == id);
+			var caseToEdit = new CasesViewModel()
+			{
+				Case = await Context.Cases
+				.Include(c => c.Photographer)
+				.Include(c => c.Postal)
+				.Include(c => c.VideoAssets)
+				.Include(c => c.ImageAssets)
+				.FirstOrDefaultAsync(c => c.CaseID == caseID)
+			};
 
 			// Check loaded case not null.
-			if (caseToEdit == null)
+			if (caseToEdit.Case == null)
 			{
 				return NotFound();
 			}
 
 			// Validate current user have edit rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, caseToEdit, AuthorizationOperations.Update)).Succeeded)
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToEdit.Case, AuthorizationOperations.Update)).Succeeded)
 			{
 				return Forbid();
 			}
@@ -249,35 +262,38 @@ namespace PhotographersVideoDist.Controllers
 		// more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost, ActionName("Edit")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditCaseAsync(int? id)
+		public async Task<IActionResult> EditCaseAsync(int? caseID)
 		{
 			// Check id not null.
-			if (id == null)
+			if (caseID == null)
 			{
 				return NotFound();
 			}
 
 			// Load case to update from db.
-			var caseToUpdate = await Context.Cases
+			var caseToUpdate = new CasesViewModel()
+			{
+				Case = await Context.Cases
 				.Include(p => p.Photographer)
 				.Include(p => p.Postal)
-				.FirstOrDefaultAsync(c => c.CaseID == id);
+				.FirstOrDefaultAsync(c => c.CaseID == caseID)
+			};
 
 			// Check loaded case not null.
-			if (caseToUpdate == null)
+			if (caseToUpdate.Case == null)
 			{
 				return NotFound();
 			}
 
 			// Validate current user have update rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, caseToUpdate, AuthorizationOperations.Update)).Succeeded)
+			if (!(await AuthorizationService.AuthorizeAsync(User, caseToUpdate.Case, AuthorizationOperations.Update)).Succeeded)
 			{
 				return Forbid();
 			}
 
 			// Try update model async.
 			if (await TryUpdateModelAsync<Case>(
-				caseToUpdate,
+				caseToUpdate.Case,
 				"",
 				c => c.CaseID, c => c.Titel, c => c.Details, c => c.Comments, c => c.Street, c => c.PostalCode))
 			{
@@ -286,26 +302,27 @@ namespace PhotographersVideoDist.Controllers
 				{
 					await Context.SaveChangesAsync();
 				}
-				catch (DbUpdateConcurrencyException)
+				catch (DbUpdateConcurrencyException ex)
 				{
-					//Log the error (uncomment ex variable name and write a log.)
+					Logger.LogWarning("Cases/EditCase: Der opstod en uventet fejl i forsøget på at gemme ændringerne i databasen. " + ex.Message);
 					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
 						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 				}
 
 				// Succeded return to index.
-				return RedirectToAction(nameof(Index));
+				return RedirectToAction("Edit", "Cases", new { caseID = caseToUpdate.Case.CaseID});
 			}
 
 			// Save changes failed, return to view.
 			return View(caseToUpdate);
 		}
 
+
 		// GET: Cases/Delete/5
-		public async Task<IActionResult> Delete(int? id)
+		public async Task<IActionResult> Delete(int? caseID)
 		{
 			// Check id not null.
-			if (id == null)
+			if (caseID == null)
 			{
 				return NotFound();
 			}
@@ -314,7 +331,7 @@ namespace PhotographersVideoDist.Controllers
 			var caseToDelete = await Context.Cases
 				.Include(p => p.Photographer)
 				.AsNoTracking()
-				.FirstOrDefaultAsync(m => m.CaseID == id);
+				.FirstOrDefaultAsync(m => m.CaseID == caseID);
 
 			// Check loaded case not null.
 			if (caseToDelete == null)
@@ -336,10 +353,10 @@ namespace PhotographersVideoDist.Controllers
 		// POST: Cases/Delete/5
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(int? id)
+		public async Task<IActionResult> DeleteConfirmed(int? caseID)
 		{
 			// Check id not null.
-			if (id == null)
+			if (caseID == null)
 			{
 				return NotFound();
 			}
@@ -348,7 +365,7 @@ namespace PhotographersVideoDist.Controllers
 			var caseToDelete = await Context.Cases
 				.Include(c => c.ImageAssets)
 				.Include(c => c.VideoAssets)
-				.FirstOrDefaultAsync(c => c.CaseID == id);
+				.FirstOrDefaultAsync(c => c.CaseID == caseID);
 
 			// Check loaded case not null.
 			if (caseToDelete == null)
@@ -369,9 +386,11 @@ namespace PhotographersVideoDist.Controllers
 			{
 				await Context.SaveChangesAsync();
 			}
-			catch (DbUpdateException)
+			catch (DbUpdateException ex)
 			{
-				ModelState.AddModelError("", "Sagen blev ikke slettet. " +
+				Logger.LogError("Cases/Delete: Sagen blev ikke slettet fra databasen: " + ex.Message);
+				ModelState.AddModelError("", "Der opstod en uventet fejl og sagen blev derfor ikke slettet. " +
+						ex.Message +
 						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 			}
 
@@ -379,217 +398,11 @@ namespace PhotographersVideoDist.Controllers
 			var deleted = AssetsFileHandler.DeleteAssetsFolder(caseToDelete.CaseID, Logger);
 
 			// Return to index.
-			return RedirectToAction(nameof(Index));
+			return RedirectToAction(nameof(Index), "Cases");
 		}
 
 
-
-		//**************************************************************************//
-		//******************* Assets Upload Methods Section ************************//
-		//**************************************************************************//
-
-		// GET: Cases/AssetsUpload
-		public async Task<IActionResult> AssetsUpload(int? id)
-		{
-			// Check id not null.
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			// Load case from db.
-			AssetsUploadViewModel caseForUpload = new AssetsUploadViewModel
-			{
-				Case = await Context.Cases
-				.Include(i => i.ImageAssets)
-				.Include(v => v.VideoAssets)
-				.FirstOrDefaultAsync(c => c.CaseID == id)
-			};
-
-			// Check case loaded correctly from db.
-			if (caseForUpload == null)
-			{
-				return NotFound();
-			}
-
-			// Authenticate user have upload rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, caseForUpload.Case, AuthorizationOperations.IsOwner)).Succeeded)
-			{
-				return Forbid();
-			}
-
-			// Set path to media files in view data.
-			ViewBag.MediaPath = "~/wwwroot/Cases/" + id + "/";
-
-			return View(caseForUpload);
-		}
-
-
-		// POST: Cases/AssetsUpload - Upload Action
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Upload(int? id, List<IFormFile> files)
-		{
-			// Check id not null.
-			if (id == null)
-			{
-				return new JsonResult(new { name = files.FirstOrDefault().FileName, value = "Fejlet" });
-			}
-
-			// Create a list of fileupload model for the files to upload.
-			IList<FileUpload> fileUploads = new List<FileUpload>();
-			foreach (IFormFile file in files)
-			{
-				fileUploads.Add(
-					new FileUpload
-					{
-						AssetsFile = file
-					});
-			}
-
-			// Check user have rights to upload files.
-			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
-			{
-				return Forbid();
-			}
-
-			// Validate files before uploading...
-			var validatedFiles = MediaFileValidator.Validate(fileUploads);
-
-			// Create new UploadFileHandler and try uploading files...
-			var UploadFileHandler = new UploadFileHandler((int)id, Logger, Context);
-			await UploadFileHandler.UploadFiles(validatedFiles);
-
-			// Create return result.
-			var result = new { name = validatedFiles.FirstOrDefault().AssetsFile.FileName, value = validatedFiles.FirstOrDefault().UploadStatus };
-
-			// For compatibility with IE's "done" event we need to return a result as well as setting the context.response
-			return new JsonResult(result);
-		}
-
-
-		// POST: Cases/AssetsUpload - Delete VideoAssets.
-		public async Task<IActionResult> DeleteVideoAssets(int? id, int? caseId)
-		{
-			// Check id not null.
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			// Load video assets to delete from db.
-			var assetsToDelete = await Context.VideoAssets
-				.Include(c => c.Case)
-				.AsNoTracking()
-				.FirstOrDefaultAsync(v => v.VideoAssetsID == id);
-
-			// Check assets loaded correct.
-			if (assetsToDelete == null)
-			{
-				return NotFound();
-			}
-
-			// Check user have delete rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
-			{
-				return Forbid();
-			}
-
-			// Delete video file from disk before removing from db.
-			var deleted = AssetsFileHandler.DeleteAssetsFile(assetsToDelete.VideoAssetsFileName, assetsToDelete.CaseID, Logger);
-
-			// Check file is deleted from the disk.
-			if (deleted)
-			{
-				// Try delete file from db and disk.
-				try
-				{
-					// Try remove assets from db async.
-					Context.VideoAssets.Remove(assetsToDelete);
-					await Context.SaveChangesAsync();
-				}
-				catch (Exception ex)
-				{
-					// Log error message and return page.
-					Logger.LogError("VideoAssets blev ikke slette fra databasen: " + ex.Message);
-					return RedirectToAction("AssetsUpload", "Cases", new { id });
-				}
-
-				// Log result information.
-				Logger.LogInformation("VideoAssets blev fjernet med succes.");
-			}
-			else
-			{
-				// Log error message.
-				Logger.LogError("Der opstod en uventet fejl, og videoen blev derfor ikke slettet!");
-			}
-
-			// If succeded return page.
-			return RedirectToAction("AssetsUpload", "Cases", new { id = caseId });
-		}
-
-
-		// POST: Cases/AssetsUpload - Delete ImageAssets.
-		public async Task<IActionResult> DeleteImageAssets(int? id, int? caseId)
-		{
-			// Check id not null.
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			// Load video assets to delete from db.
-			var assetsToDelete = await Context.ImageAssets
-				.Include(c => c.Case)
-				.AsNoTracking()
-				.FirstOrDefaultAsync(i => i.ImageAssetsID == id);
-
-			// Check assets loaded correct.
-			if (assetsToDelete == null)
-			{
-				return NotFound();
-			}
-
-			// Check user have delete rights.
-			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
-			{
-				return Forbid();
-			}
-
-			// Delete video file from disk before deleting from db.
-			var deleted = AssetsFileHandler.DeleteAssetsFile(assetsToDelete.ImageFileName, assetsToDelete.CaseID, Logger);
-
-			// Check file is deleted from the disk.
-			if (deleted)
-			{
-				// Try delete from db.
-				try
-				{
-					// Try remove assets from db async.
-					Context.ImageAssets.Remove(assetsToDelete);
-					await Context.SaveChangesAsync();
-				}
-				catch (Exception ex)
-				{
-					// Log error message and return page.
-					Logger.LogError("ImageAssets blev ikke slette fra databasen: " + ex.Message);
-					return RedirectToAction("AssetsUpload", "Cases", new { id });
-				}
-
-				// Log result information.
-				Logger.LogInformation("ImageAssets blev fjernet med succes.");
-			}
-			else
-			{
-				// Log error message.
-				Logger.LogError("Der opstod en uventet fejl, og billedet blev derfor ikke slettet!");
-			}
-
-			// If succeded return page.
-			return RedirectToAction("AssetsUpload", "Cases", new { id = caseId });
-		}
-
-		// POST: 
+		// POST: Cases/Create - Cases/Edit - Publish Action
 		public async Task<IActionResult> Publish(int? caseID)
 		{
 			// Check case id not null...
@@ -615,31 +428,45 @@ namespace PhotographersVideoDist.Controllers
 
 			// Set case state to published.
 			caseToPublish.IsPublished = true;
+			caseToPublish.Published = DateTime.Now;
 
-			// Try update model async.
-			if (await TryUpdateModelAsync<Case>(
-				caseToPublish,
-				"",
-				c => c.Published))
+			// Try save changes async..
+			try
 			{
-				// Try save changes async..
-				try
-				{
-					await Context.SaveChangesAsync();
-				}
-				catch (DbUpdateConcurrencyException)
-				{
-					//Log the error (uncomment ex variable name and write a log.)
-					ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
-						"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
-				}
+				await Context.SaveChangesAsync();
 			}
+			catch (DbUpdateConcurrencyException)
+			{
+				//Log the error (uncomment ex variable name and write a log.)
+				ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
+					"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+			}
+
+			//// Try update model async.
+			//if (await TryUpdateModelAsync<Case>(
+			//	caseToPublish,
+			//	"",
+			//	c => c.Published, c => c.IsPublished))
+			//{
+			//	// Try save changes async..
+			//	try
+			//	{
+			//		await Context.SaveChangesAsync();
+			//	}
+			//	catch (DbUpdateConcurrencyException)
+			//	{
+			//		//Log the error (uncomment ex variable name and write a log.)
+			//		ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
+			//			"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
+			//	}
+			//}
 
 			// Succeded return to index.
 			return RedirectToAction(nameof(SendFilesToFTPServer), "Cases", new { caseID = caseToPublish.CaseID });
 		}
 
-		// POST: Cases/AssetsUpload - Send Files To FTP Server
+
+		// POST: Cases/Create - Cases/Edit - Send Files To FTP Server Action.
 		public async Task<IActionResult> SendFilesToFTPServer(int? caseID)
 		{
 			// Check caseID not null.
@@ -693,11 +520,61 @@ namespace PhotographersVideoDist.Controllers
 			return RedirectToAction(nameof(Index), "Cases");
 		}
 
+
+
+		//**************************************************************************//
+		//******************* Assets Upload Methods Section ************************//
+		//**************************************************************************//
+
+		// POST: Cases/Create - Cases/Edit - Upload Action
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Upload(int? id, List<IFormFile> files)
+		{
+			// Check id not null.
+			if (id == null)
+			{
+				return new JsonResult(new { name = files.FirstOrDefault().FileName, value = "Fejlet" });
+			}
+
+			// Create a list of fileupload model for the files to upload.
+			IList<FileUpload> fileUploads = new List<FileUpload>();
+			foreach (IFormFile file in files)
+			{
+				fileUploads.Add(
+					new FileUpload
+					{
+						AssetsFile = file
+					});
+			}
+
+			// Check user have rights to upload files.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Upload)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Validate files before uploading...
+			var validatedFiles = MediaFileValidator.Validate(fileUploads);
+
+			// Create new UploadFileHandler and try uploading files...
+			var UploadFileHandler = new UploadFileHandler((int)id, Logger, Context);
+			await UploadFileHandler.UploadFiles(validatedFiles);
+
+			// Create return result.
+			var result = new { name = validatedFiles.FirstOrDefault().AssetsFile.FileName, value = validatedFiles.FirstOrDefault().UploadStatus };
+
+			// For compatibility with IE's "done" event we need to return a result as well as setting the context.response
+			return new JsonResult(result);
+		}
+
+
+
 		//**************************************************************************//
 		//******************  Json result for autocomplete functions   *************//
 		//**************************************************************************//
 
-		// Get cities json for autocomplete.
+		// GET JSON Result: Cities autocomplete.
 		[HttpPost]
 		public JsonResult GetCities(string prefix)
 		{
@@ -710,7 +587,8 @@ namespace PhotographersVideoDist.Controllers
 			return Json(cityList);
 		}
 
-		// Get postalcode json for autocomplete.
+
+		// GET JSON Result: Postalcode autocomplete.
 		[HttpPost]
 		public JsonResult GetPostals(string prefix)
 		{
@@ -727,9 +605,220 @@ namespace PhotographersVideoDist.Controllers
 		//***********************  Method for media actions   **********************//
 		//**************************************************************************//
 
-		public async Task<IActionResult> GenerateStillsFromVideo(string videoFileName, int? assetsFolderID)
+		// POST: Cases/Create - Delete VideoAssets.
+		public async Task<IActionResult> DeleteVideoAssetsCreateViewAsync(int? id, int? caseID)
 		{
-			// Check caseID not null.
+			// Check id not null.
+			if (id == null || caseID == null)
+			{
+				return NotFound();
+			}
+
+			// Load video assets to delete from db.
+			var assetsToDelete = await Context.VideoAssets
+				.Include(c => c.Case)
+				.AsNoTracking()
+				.FirstOrDefaultAsync(v => v.VideoAssetsID == id);
+
+			// Check assets loaded correct.
+			if (assetsToDelete == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Delete Video Assets.
+			await DeleteVideoAssetsAsync(assetsToDelete);
+
+			// Return to page.
+			return RedirectToAction("Create", "Cases", new { caseID });
+		}
+
+		// POST: Cases/Edit - Delete VideoAssets.
+		public async Task<IActionResult> DeleteVideoAssetsEditViewAsync(int? id, int? caseID)
+		{
+			// Check id not null.
+			if (id == null || caseID == null)
+			{
+				return NotFound();
+			}
+
+			// Load video assets to delete from db.
+			var assetsToDelete = await Context.VideoAssets
+				.Include(c => c.Case)
+				.AsNoTracking()
+				.FirstOrDefaultAsync(v => v.VideoAssetsID == id);
+
+			// Check assets loaded correct.
+			if (assetsToDelete == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Delete Video Assets.
+			await DeleteVideoAssetsAsync(assetsToDelete);
+
+			// Return to page.
+			return RedirectToAction("Edit", "Cases", new { caseID });
+		}
+
+		// Action: Delete Video Assets.
+		public async Task DeleteVideoAssetsAsync(VideoAssets videoAssets)
+		{
+			// Delete video file from disk before removing from db.
+			var deleted = AssetsFileHandler.DeleteAssetsFile(videoAssets.VideoAssetsFileName, videoAssets.CaseID, Logger);
+
+			// Check file is deleted from the disk.
+			if (deleted)
+			{
+				// Try delete file from db and disk.
+				try
+				{
+					// Try remove assets from db async.
+					Context.VideoAssets.Remove(videoAssets);
+					await Context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					// Log error message and return.
+					Logger.LogError("VideoAssets blev ikke slette fra databasen: " + ex.Message);
+					return;
+				}
+
+				// Log result information.
+				Logger.LogInformation("VideoAssets blev fjernet med succes.");
+			}
+			else
+			{
+				// Log error message.
+				Logger.LogError("Der opstod en uventet fejl, og videoen blev derfor ikke slettet!");
+			}
+
+			// If succeded return.
+			return;
+		}
+
+
+		// POST: Cases/Create - Delete ImageAssets.
+		public async Task<IActionResult> DeleteImageAssetsCreateViewAsync(int? id, int? caseID)
+		{
+			// Check id not null.
+			if (id == null || caseID == null)
+			{
+				return NotFound();
+			}
+
+			// Load video assets to delete from db.
+			var assetsToDelete = await Context.ImageAssets
+				.Include(c => c.Case)
+				.AsNoTracking()
+				.FirstOrDefaultAsync(i => i.ImageAssetsID == id);
+
+			// Check assets loaded correct.
+			if (assetsToDelete == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Delete assets.
+			await DeleteImageAssetsAsync(assetsToDelete);
+
+			// Return to page.
+			return RedirectToAction("Create", "Cases", new { caseID });
+		}
+
+		// POST: Cases/Edit - Delete ImageAssets.
+		public async Task<IActionResult> DeleteImageAssetsEditViewAsync(int? id, int? caseID)
+		{
+			// Check id not null.
+			if (id == null || caseID == null)
+			{
+				return NotFound();
+			}
+
+			// Load video assets to delete from db.
+			var assetsToDelete = await Context.ImageAssets
+				.Include(c => c.Case)
+				.AsNoTracking()
+				.FirstOrDefaultAsync(i => i.ImageAssetsID == id);
+
+			// Check assets loaded correct.
+			if (assetsToDelete == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have delete rights.
+			if (!(await AuthorizationService.AuthorizeAsync(User, assetsToDelete.Case, AuthorizationOperations.Delete)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			// Delete assets.
+			await DeleteImageAssetsAsync(assetsToDelete);
+
+			// Return to page.
+			return RedirectToAction("Edit", "Cases", new { caseID });
+		}
+
+		// Action: Delete Image Assets.
+		public async Task DeleteImageAssetsAsync(ImageAssets imageAssets)
+		{
+			// Delete video file from disk before deleting from db.
+			var deleted = AssetsFileHandler.DeleteAssetsFile(imageAssets.ImageFileName, imageAssets.CaseID, Logger);
+
+			// Check file is deleted from the disk.
+			if (deleted)
+			{
+				// Try delete from db.
+				try
+				{
+					// Try remove assets from db async.
+					Context.ImageAssets.Remove(imageAssets);
+					await Context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					// Log error message and return page.
+					Logger.LogError("ImageAssets blev ikke slette fra databasen: " + ex.Message);
+					return;
+				}
+
+				// Log result information.
+				Logger.LogInformation("ImageAssets blev fjernet med succes.");
+			}
+			else
+			{
+				// Log error message.
+				Logger.LogError("Der opstod en uventet fejl, og billedet blev derfor ikke slettet!");
+			}
+
+			// Return.
+			return;
+		}
+
+
+		// Action: Cases/Create - Generate Stills from video.
+		public async Task<IActionResult> CreateViewAutoStillsAsync(string videoFileName, int? assetsFolderID)
+		{
+			// Check id not null.
 			if (assetsFolderID == null)
 			{
 				return NotFound();
@@ -741,12 +830,41 @@ namespace PhotographersVideoDist.Controllers
 				return Forbid();
 			}
 
+			await GenerateStillsFromVideoAsync(videoFileName, (int)assetsFolderID);
+
+			return RedirectToAction("Create", "Cases", new { caseID = assetsFolderID});
+		}
+
+
+		// Action: Cases/Edit - Generate Stills from video.
+		public async Task<IActionResult> EditViewAutoStillsAsync(string videoFileName, int? assetsFolderID)
+		{
+			// Check id not null.
+			if (assetsFolderID == null)
+			{
+				return NotFound();
+			}
+
+			// Check user have rights to generate stills.
+			if (!(await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.MediaProcessing)).Succeeded)
+			{
+				return Forbid();
+			}
+
+			await GenerateStillsFromVideoAsync(videoFileName, (int)assetsFolderID);
+
+			return RedirectToAction("Edit", "Cases", new { caseID = assetsFolderID });
+		}
+
+		// Action: Generate Auto Stills function.
+		public async Task GenerateStillsFromVideoAsync(string videoFileName, int assetsFolderID)
+		{
 			// Make a list for assets to delete if saving to db fails.
 			List<string> notSavedAssetsList = new List<string>();
 
 			// Generate stills from video and return list of generated files.
 			MediaProcessingFFMPEG mediaProcessing = new MediaProcessingFFMPEG(Logger);
-			var generatedAssets = mediaProcessing.GenerateStillsFromVideo(videoFileName, (int)assetsFolderID);
+			var generatedAssets = mediaProcessing.GenerateStillsFromVideo(videoFileName, assetsFolderID);
 
 			// Check genrated files not null and add them to db.
 			if (generatedAssets != null)
@@ -775,14 +893,15 @@ namespace PhotographersVideoDist.Controllers
 			// Delete unsaved assets from disk.
 			foreach (var notSavedAssets in notSavedAssetsList)
 			{
-				AssetsFileHandler.DeleteAssetsFile(notSavedAssets, (int)assetsFolderID, Logger);
+				AssetsFileHandler.DeleteAssetsFile(notSavedAssets, assetsFolderID, Logger);
 			}
 
-			// Refresh page.
-			return RedirectToAction("AssetsUpload", "Cases", new { id = assetsFolderID });
+			// Return.
+			return;
 		}
 
-		// Save image assets to db.
+
+		// Action: Save image assets to db.
 		public async Task<bool> SaveImageAssetsToDb(ImageAssets imageAssets)
 		{
 			// Try save the changes to database.
@@ -809,8 +928,5 @@ namespace PhotographersVideoDist.Controllers
 			// Succeded return true.
 			return true;
 		}
-
-		// Make image primary.
-
 	}
 }
