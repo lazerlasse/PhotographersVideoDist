@@ -39,7 +39,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.Street" class="control-label"></label>
-                <input name="Street" asp-for="Case.Street" class="form-control" id="route" />
+                <input name="Street" asp-for="Case.Street" class="form-control" id="route" autocomplete="off"/>
                 <span asp-validation-for="Case.Street" class="text-danger"></span>
             </div>
         </div>
@@ -48,14 +48,14 @@
         <div class="col-md-3 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.PostalCode" class="control-label"></label>
-                <input name="PostalCode" asp-for="Case.PostalCode" type="number" class="form-control" id="postal_code" onfocus="findPostal()" />
+                <input name="PostalCode" asp-for="Case.PostalCode" type="number" class="form-control" id="postal_code" onfocus="findPostal()" autocomplete="off"/>
                 <span asp-validation-for="Case.PostalCode" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-5">
             <div class="form-group">
                 <label asp-for="Case.Postal.Town" class="control-label"></label>
-                <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" />
+                <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" autocomplete="off"/>
                 <span asp-validation-for="Case.Postal.Town" class="text-danger"></span>
             </div>
         </div>

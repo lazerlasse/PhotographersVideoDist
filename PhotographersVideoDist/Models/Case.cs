@@ -30,7 +30,7 @@ namespace PhotographersVideoDist.Models
 
 
 		// Navigation Properties for Postalcode and Town.
-		[ForeignKey("Postal"), MaxLength(4)]
+		[ForeignKey("Postal"), MaxLength(4), Display(Name = "Post Nr")]
 		public string PostalCode { get; set; }		// FK For Postal.
 		public Postal Postal { get; set; }      // Navigation Property For Postal.
 
