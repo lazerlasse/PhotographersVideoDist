@@ -25,6 +25,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using PhotographersVideoDist.Models;
+using PhotographersVideoDist.Hubs;
+using Coravel;
 
 namespace PhotographersVideoDist
 {
@@ -42,6 +44,12 @@ namespace PhotographersVideoDist
 		{
 			// Add data protection service.
 			services.AddDataProtection();
+
+			// Add SignalR Hub service.
+			services.AddSignalR();
+
+			// Add Coravel Task Queue.
+			services.AddQueue();
 
 			// Form options for accepting large upload file size.
 			services.Configure<FormOptions>(x =>
@@ -175,6 +183,7 @@ namespace PhotographersVideoDist
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 				endpoints.MapRazorPages();
+				endpoints.MapHub<FtpProgressHub>("/ftpProgressHub");
 			});
 		}
 	}

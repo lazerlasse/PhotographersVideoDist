@@ -1,8 +1,10 @@
 ﻿using FluentFTP;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PhotographersVideoDist.Controllers;
+using PhotographersVideoDist.Hubs;
 using PhotographersVideoDist.Models;
 using System;
 using System.Collections.Generic;
@@ -20,8 +22,16 @@ namespace PhotographersVideoDist.Data
 		private string EncryptedPassword { get; set; }
 		private string FtpUrl { get; set; }
 		private string FtpRemoteDir { get; set; }
+		private IHubContext<FtpProgressHub> HubContext { get; set; }
 
-		public MediaFilesFTPClient(IDataProtectionProvider dataProtectionProvider, ILogger<CasesController> logger, string username, string encryptedPassword, string ftpUrl, string ftpRemoteDir)
+		public MediaFilesFTPClient(
+			IDataProtectionProvider dataProtectionProvider,
+			ILogger<CasesController> logger,
+			string username,
+			string encryptedPassword,
+			string ftpUrl,
+			string ftpRemoteDir,
+			IHubContext<FtpProgressHub> hubContext)
 		{
 			DataProtector = dataProtectionProvider.CreateProtector("FTPAccountModel");
 			Username = username;
@@ -29,9 +39,10 @@ namespace PhotographersVideoDist.Data
 			FtpUrl = ftpUrl;
 			FtpRemoteDir = ftpRemoteDir;
 			Logger = logger;
+			HubContext = hubContext;
 		}
 
-		public async Task UploadFiles(List<string> filesToUpload)
+		public async Task UploadFiles(List<string> filesToUpload, string jobId)
 		{
 			// Generete default cancellation token.
 			var token = new CancellationToken();
@@ -39,35 +50,40 @@ namespace PhotographersVideoDist.Data
 			// Create new ftp client.
 			using var ftp = new FtpClient(FtpUrl, Username, DataProtector.Unprotect(EncryptedPassword));
 
+			// Create the progress notifier for the upload.
+			Progress<FtpProgress> progress = new Progress<FtpProgress>(async p =>
+			{
+				if (p.Progress == 1)
+				{
+					await HubContext.Clients.Group(jobId).SendAsync("progress", p.Progress, "Færdig", p.TransferSpeed, 0);
+					Logger.LogInformation("Filerne blev uploadet til FTP Serveren.");
+				}
+				else
+				{
+					double mbByteSendt = (p.TransferredBytes / 1024) / 1024;
+					await HubContext.Clients.Group(jobId).SendAsync("progress", p.Progress, "Uploader: " + p.FileIndex + " / " + p.FileCount, p.TransferSpeed, mbByteSendt);
+					Logger.LogInformation("Sender filen " + filesToUpload.ElementAtOrDefault(p.FileIndex) + " til FTP: " + p.Progress + "%");
+				}
+			});
+
+			ftp.RetryAttempts = 3;
+			int succesCount = 0;
+
 			try
 			{
 				// Connect to server async.
 				await ftp.ConnectAsync(token);
 
-				Progress<FtpProgress> progress = new Progress<FtpProgress>(p =>
-			   {
-				   if (p.Progress == 1)
-				   {
-					   Logger.LogInformation("Filerne blev uploadet til FTP Serveren.");
-				   }
-				   else
-				   {
-					   Logger.LogInformation("Sender filer til FTP: " + p.Progress + "%");
-				   }
-			   });
-
-
-
-				// upload many files, skip if they already exist on server
-				await ftp.UploadFilesAsync(filesToUpload, FtpRemoteDir, FtpRemoteExists.Append, false, FtpVerify.None, FtpError.None, token, progress);
-
-
-				Logger.LogInformation("Filerne blev sendt til FTP serveren med succes: ");
+				// upload many files, skip if they already exist on server.
+				succesCount = await ftp.UploadFilesAsync(filesToUpload, FtpRemoteDir, FtpRemoteExists.Append, false, FtpVerify.Retry, FtpError.Throw, token, progress);
 			}
-			catch (Exception ex)
+			catch (FtpException ex)
 			{
+				await HubContext.Clients.Group(jobId).SendAsync("progress", 0, "Fejlet: " + ex.Message, 0, 0);
 				Logger.LogError("Der skete en uventet fejl i forsøget på at uploade filerne til FTP serveren: " + ex.Message);
 			}
+
+			await HubContext.Clients.Group(jobId).SendAsync("progress", 0, succesCount + " / " + filesToUpload.Count + " Blev uploadet til serveren.", 0, 0);
 		}
 	}
 }

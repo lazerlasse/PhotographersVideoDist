@@ -20,13 +20,23 @@ using PhotographersVideoDist.Utilities;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
 using Microsoft.VisualBasic;
+using Microsoft.AspNetCore.SignalR;
+using PhotographersVideoDist.Hubs;
+using Coravel.Queuing.Interfaces;
 
 namespace PhotographersVideoDist.Controllers
 {
 	public class CasesController : CaseBaseController
 	{
-		public CasesController(ApplicationDbContext context, IAuthorizationService authorizationService, UserManager<ApplicationUser> userManager, IDataProtectionProvider protectionProvider, ILogger<CasesController> logger)
-			: base(context, authorizationService, userManager, protectionProvider, logger)
+		public CasesController(
+			ApplicationDbContext context,
+			IAuthorizationService authorizationService,
+			UserManager<ApplicationUser> userManager,
+			IDataProtectionProvider protectionProvider,
+			ILogger<CasesController> logger,
+			IHubContext<FtpProgressHub> hubContext,
+			IQueue taskQueue)
+			: base(context, authorizationService, userManager, protectionProvider, logger, hubContext, taskQueue)
 		{
 		}
 
@@ -442,25 +452,6 @@ namespace PhotographersVideoDist.Controllers
 					"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
 			}
 
-			//// Try update model async.
-			//if (await TryUpdateModelAsync<Case>(
-			//	caseToPublish,
-			//	"",
-			//	c => c.Published, c => c.IsPublished))
-			//{
-			//	// Try save changes async..
-			//	try
-			//	{
-			//		await Context.SaveChangesAsync();
-			//	}
-			//	catch (DbUpdateConcurrencyException)
-			//	{
-			//		//Log the error (uncomment ex variable name and write a log.)
-			//		ModelState.AddModelError("", "Ændringerne kunne ikke gemmes. " +
-			//			"Prøv venligst igen! Kontakt support hvis fejlen fortsætter.");
-			//	}
-			//}
-
 			// Succeded return to index.
 			return RedirectToAction(nameof(SendFilesToFTPServer), "Cases", new { caseID = caseToPublish.CaseID });
 		}
@@ -503,7 +494,6 @@ namespace PhotographersVideoDist.Controllers
 				filesToUpload.Add(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Cases", caseID.ToString(), assets.VideoAssetsFileName));
 			}
 
-
 			// Load current user.
 			var user = await UserManager.GetUserAsync(User);
 
@@ -513,14 +503,30 @@ namespace PhotographersVideoDist.Controllers
 				return NotFound();
 			}
 
-			// Upload files to FTP Server.
-			var ftpClient = new MediaFilesFTPClient(ProtectionProvider, Logger, user.FTP_UserName, user.FTP_EncryptedPassword, user.FTP_Url, user.FTP_RemoteDir);
-			await ftpClient.UploadFiles(filesToUpload);
+			// Create new FTP Client.
+			var ftpClient = new MediaFilesFTPClient(
+				ProtectionProvider,
+				Logger, user.FTP_UserName,
+				user.FTP_EncryptedPassword,
+				user.FTP_Url,
+				user.FTP_RemoteDir,
+				HubContext);
 
-			return RedirectToAction(nameof(Index), "Cases");
+			// Create new job id and queue the task.
+			string jobId = Guid.NewGuid().ToString("N");
+			TaskQueue.QueueAsyncTask(() => ftpClient.UploadFiles(filesToUpload, jobId));
+
+			// Return to the progress page and start updating progress.
+			return RedirectToAction("Progress", new { jobId });
 		}
 
+		// Progress page for ftp file upload.
+		public IActionResult Progress(string jobId)
+		{
+			ViewBag.JobId = jobId;
 
+			return View();
+		}
 
 		//**************************************************************************//
 		//******************* Assets Upload Methods Section ************************//

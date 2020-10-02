@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Sender filer til FTP Server";
+}
+
+<div class="row h-50 align-items-md-center">
+    <div class="col-md-4 offset-4">
+        <h4>@ViewData["Title"]</h4>
+
+        <p><strong><span id="job-status"></span></strong></p>
+
+        <div id="progress" class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated text-center" role="progressbar" style="width: 0%;"><span id="progressLabel"></span></div>
+        </div>
+
+        <p><span id="speed">N/A</span> / <span id="bytesSend">N/A</span></p>
+    </div>
+</div>
+
+
+
+@section Scripts
+{
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/ftpProgressHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        connection.on("progress", function (percent, status, speed, byte) {
+            document.getElementById("job-status").innerText = `${status}`;
+            $('#progress .progress-bar').css(
+                'width',
+                percent + '%'
+            );
+            var transferSpeed = (speed / 1024).toFixed(2);
+            var transferLabel;
+            if (transferSpeed >= 1024) {
+                transferLabel = `${(transferSpeed / 1024).toFixed(2)} mb/s`;
+            }
+            else {
+                transferLabel = `${transferSpeed} kb/s`
+            }
+            document.getElementById("progressLabel").innerText = `${percent.toFixed(2)}%`;
+            document.getElementById("speed").innerText = `${transferLabel}`;
+            document.getElementById("bytesSend").innerText = `${byte.toFixed(2)} MB`;
+        });
+        connection.start()
+            .then(_ => connection.invoke("AssociateJob", "@ViewBag.JobId"))
+            .catch(err => console.error(err.toString()));
+    </script>
+}

@@ -57,6 +57,12 @@ namespace PhotographersVideoDist.Data
 					Email = "brandmandlasse@gmail.com",
 					EmailConfirmed = true
 				},
+				new ApplicationUser
+				{
+					UserName = "Kiki Espensen",
+					Email = "kiki_15_43@hotmail.com",
+					EmailConfirmed = true
+				}
 			};
 
 			// Loop through the administrators and add them...
@@ -132,6 +138,12 @@ namespace PhotographersVideoDist.Data
 				{
 					UserName = "Miki Hedengran",
 					Email = "miki@fixitmedia.dk",
+					EmailConfirmed = true
+				},
+				new ApplicationUser
+				{
+					UserName = "Kenneth Grymen",
+					Email = "kenneth@fixitmedia.dk",
 					EmailConfirmed = true
 				}
 			};

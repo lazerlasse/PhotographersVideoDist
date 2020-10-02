@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using PhotographersVideoDist.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace PhotographersVideoDist.Areas.Identity.Pages.Account
 {
@@ -83,7 +85,14 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+
+                    var user = await _signInManager.UserManager.FindByNameAsync(Input.UserName);
+
+                    if (await _signInManager.UserManager.IsInRoleAsync(user, "Fotograf"))
+					{
+                        returnUrl = Url.Content("~/Cases/Create");
+					}
+					return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
