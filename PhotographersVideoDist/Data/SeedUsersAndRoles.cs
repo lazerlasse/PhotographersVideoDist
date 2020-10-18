@@ -145,6 +145,24 @@ namespace PhotographersVideoDist.Data
 					UserName = "Kenneth Grymen",
 					Email = "kenneth@fixitmedia.dk",
 					EmailConfirmed = true
+				},
+				new ApplicationUser
+				{
+					UserName = "Casper Hansen",
+					Email = "casper@fixitmedia.dk",
+					EmailConfirmed = true
+				},
+				new ApplicationUser
+				{
+					UserName = "Michael Nordborg",
+					Email = "nordborg@fixitmedia.dk",
+					EmailConfirmed = true
+				},
+				new ApplicationUser
+				{
+					UserName = "Allan",
+					Email = "allan@fixitmedia.dk",
+					EmailConfirmed = true
 				}
 			};
 
