@@ -11,7 +11,7 @@
 @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Create)).Succeeded)
 {
     <p>
-        <a class="btn badge-primary" asp-action="Create" asp-controller="Cases">Opret sag</a>
+        <a class="btn badge-primary" asp-action="Create" asp-controller="Cases"><i class="fas fa-plus-square fa-lg"></i> Ny sag</a>
     </p>
 }
 
@@ -19,14 +19,20 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model[0].Created)
+                @Html.DisplayNameFor(model => model[0].IsPublished)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].Published)
+                @Html.DisplayNameFor(model => model[0].Created)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model[0].Titel)
             </th>
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model.FirstOrDefault(), AuthorizationOperations.IsAdmin)).Succeeded)
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model[0].PhotographerID)
+                </th>
+            }
             <th>
                 Handlinger
             </th>
@@ -36,15 +42,30 @@
         @foreach (var item in Model)
         {
             <tr>
+                @if (item.IsPublished)
+                {
+                    <td>
+                        <span class="fas fa-check-circle fa-align-center fa-lg" style="color:green"></span>
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <span class="fas fa-exclamation-circle fa-align-center fa-lg" style="color:yellow"></span>
+                    </td>
+                }
                 <td>
                     @Html.DisplayFor(modelItem => item.Created)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Published)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Titel)
                 </td>
+                @if ((await AuthorizationService.AuthorizeAsync(User, item, AuthorizationOperations.IsAdmin)).Succeeded)
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Photographer.UserName)
+                    </td>
+                }
                 <td>
                     <a asp-action="Details" asp-controller="Cases" asp-route-caseID="@item.CaseID">Vis</a>
 
@@ -72,12 +93,14 @@
 }
 
 <a asp-action="Index"
+   asp-controller="Cases"
    asp-route-pageNumber="@(Model.PageIndex - 1)"
-   class="btn btn-default @prevDisabled">
-    Forrige
+   class="btn btn-primary @prevDisabled">
+   <i class="fas fa-arrow-left fa-lg"></i> Forrige
 </a>
 <a asp-action="Index"
    asp-route-pageNumber="@(Model.PageIndex + 1)"
-   class="btn btn-default @nextDisabled">
-    Næste
+   asp-controller="Cases"
+   class="btn btn-primary @nextDisabled">
+   Næste <i class="fas fa-arrow-right fa-lg"></i>
 </a>

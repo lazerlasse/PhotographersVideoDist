@@ -60,9 +60,8 @@ namespace PhotographersVideoDist.Data
 				}
 				else
 				{
-					double mbByteSendt = (p.TransferredBytes / 1024) / 1024;
-					await HubContext.Clients.Group(jobId).SendAsync("progress", p.Progress, "Uploader: " + p.FileIndex + " / " + p.FileCount, p.TransferSpeed, mbByteSendt);
-					Logger.LogInformation("Sender filen " + filesToUpload.ElementAtOrDefault(p.FileIndex) + " til FTP: " + p.Progress + "%");
+					await HubContext.Clients.Group(jobId).SendAsync("progress", p.Progress, "Sender fil: " + p.FileIndex + " / " + p.FileCount + " til FTP serveren.", p.TransferSpeedToString(), p.TransferredBytes);
+					Logger.LogInformation("Sender fil " + p.FileIndex + " / " + p.FileCount + " til FTP: " + p.Progress + "%");
 				}
 			});
 

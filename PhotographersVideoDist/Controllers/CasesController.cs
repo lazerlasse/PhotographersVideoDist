@@ -49,18 +49,30 @@ namespace PhotographersVideoDist.Controllers
 				return Forbid();
 			}
 
-			// Query cases from db.
-			var cases = Context.Cases
-				.Include(p => p.Photographer)
-				.Include(p => p.Postal)
-				.AsNoTracking()
-				.Where(c => c.PhotographerID == UserManager.GetUserId(User));
+			IQueryable<Case> cases;
+
+			if (User.IsInRole("Administrator"))
+			{
+				cases = Context.Cases
+					.Include(p => p.Photographer)
+					.Include(p => p.Postal)
+					.AsNoTracking();
+			}
+			else
+			{
+				// Query cases from db.
+				cases = Context.Cases
+					.Include(p => p.Photographer)
+					.Include(p => p.Postal)
+					.AsNoTracking()
+					.Where(c => c.PhotographerID == UserManager.GetUserId(User));
+			}
 
 			// Set page size.
 			int pageSize = 10;
 
 			// Return View and load content async.
-			return View(await PaginatedList<Case>.CreateAsync(cases, pageNumber ?? 1, pageSize));
+			return View(await PaginatedList<Case>.CreateAsync(cases.OrderByDescending(c => c.CaseID), pageNumber ?? 1, pageSize));
 		}
 
 		// GET: Cases/Details/5
@@ -198,19 +210,6 @@ namespace PhotographersVideoDist.Controllers
 				"",
 				c => c.CaseID, c => c.Titel, c => c.Details, c => c.Comments, c => c.Street, c => c.PostalCode))
 			{
-				// Check and update Town and Postalcode.
-				if (caseToCreate.PostalCode == null && caseToCreate.Postal.Town != null)
-				{
-					var postalResult = await Context.Postals
-						.AsNoTracking()
-						.FirstOrDefaultAsync(p => p.Town.ToLower().Contains(caseToCreate.Postal.Town.ToLower()));
-
-					if (postalResult != null)
-					{
-						caseToCreate.PostalCode = postalResult.PostalCode;
-					}
-				}
-
 				// Try save changes async..
 				try
 				{
@@ -320,7 +319,7 @@ namespace PhotographersVideoDist.Controllers
 				}
 
 				// Succeded return to index.
-				return RedirectToAction("Edit", "Cases", new { caseID = caseToUpdate.Case.CaseID});
+				return RedirectToAction("Edit", "Cases", new { caseID = caseToUpdate.Case.CaseID });
 			}
 
 			// Save changes failed, return to view.
@@ -838,7 +837,7 @@ namespace PhotographersVideoDist.Controllers
 
 			await GenerateStillsFromVideoAsync(videoFileName, (int)assetsFolderID);
 
-			return RedirectToAction("Create", "Cases", new { caseID = assetsFolderID});
+			return RedirectToAction("Create", "Cases", new { caseID = assetsFolderID });
 		}
 
 

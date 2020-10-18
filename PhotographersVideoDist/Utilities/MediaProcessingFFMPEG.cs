@@ -35,7 +35,7 @@ namespace PhotographersVideoDist.Utilities
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 			{
 				// Generate the command line args to be executed.
-				string linuxCommandToExecute = "ffmpeg -ss 00:00:03 -i " + inputFile + " -vf fps=1/7 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
+				string linuxCommandToExecute = "ffmpeg -ss 00:00:01 -i " + inputFile + " -vf fps=1/3 -f image2 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
 
 				// Run the process on Linux.
 				ProcessLinux(linuxCommandToExecute);
@@ -46,7 +46,7 @@ namespace PhotographersVideoDist.Utilities
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				// Generate the command line args to be executed.
-				string winCommandToExecute = "-ss 00:00:03 -i " + inputFile + " -vf fps=1/7 -f image2 -vframes 8 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
+				string winCommandToExecute = "-ss 00:00:01 -i " + inputFile + " -vf fps=1/3 -f image2 " + Path.Combine(assetsPath, fileNameWithoutExtension + "-%03d.jpeg");
 
 				// Run the process on Windows.
 				ProcessWindows(winCommandToExecute);

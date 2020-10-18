@@ -131,17 +131,22 @@ namespace PhotographersVideoDist.Data
 					CaseID = _caseID
 				};
 
-				// Try save assets to db.
-				try
+
+				// Check if assets already saved to db.
+				if (!await _context.ImageAssets.Where(i => i.ImageFileName == image.ImageFileName).Where(i => i.CaseID == image.CaseID).AnyAsync())
 				{
-					_context.ImageAssets.Add(image);
-					await _context.SaveChangesAsync();
-					_logger.LogInformation("ImageAssets ID: " + image.ImageAssetsID + " Filnavn: " + image.ImageFileName + " blev gemt i databasen med succes.");
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError("Kunne ikke gemme billedet i databasen! Filnavn: " + image.ImageFileName + " Meddelelse: " + ex.Message);
-					return false;
+					// Try save assets to db.
+					try
+					{
+						_context.ImageAssets.Add(image);
+						await _context.SaveChangesAsync();
+						_logger.LogInformation("ImageAssets ID: " + image.ImageAssetsID + " Filnavn: " + image.ImageFileName + " blev gemt i databasen med succes.");
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError("Kunne ikke gemme billedet i databasen! Filnavn: " + image.ImageFileName + " Meddelelse: " + ex.Message);
+						return false;
+					}
 				}
 			}
 

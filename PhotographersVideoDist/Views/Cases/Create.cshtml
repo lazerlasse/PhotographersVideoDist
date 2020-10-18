@@ -23,7 +23,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Case.Details" class="control-label"></label>
-                <textarea name="Details" asp-for="Case.Details" class="form-control" rows="5"></textarea>
+                <textarea name="Details" asp-for="Case.Details" class="form-control" rows="10"></textarea>
                 <span asp-validation-for="Case.Details" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -39,7 +39,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="form-group" id="locationField">
                 <h4 class="control-label">Find adresse</h4>
-                <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" placeholder="Skriv adresse" autocomplete="off"/>
+                <input class="form-control" id="autocomplete" onFocus="geolocate()" type="text" placeholder="Skriv adresse" autocomplete="chrome-off"/>
             </div>
             <hr /><br />
         </div>
@@ -49,7 +49,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.Street" class="control-label"></label>
-                <input name="Street" asp-for="Case.Street" class="form-control" id="route" autocomplete="off" />
+                <input name="Street" asp-for="Case.Street" class="form-control" id="route" autocomplete="chrome-off" />
                 <span asp-validation-for="Case.Street" class="text-danger"></span>
             </div>
         </div>
@@ -59,14 +59,14 @@
         <div class="col-md-3 offset-md-2">
             <div class="form-group">
                 <label asp-for="Case.PostalCode" class="control-label"></label>
-                <input name="PostalCode" asp-for="Case.PostalCode" class="form-control" id="postal_code" onfocus="findPostal()" autocomplete="off" />
+                <input name="PostalCode" asp-for="Case.PostalCode" class="form-control" id="postal_code" onfocus="findPostal()" autocomplete="chrome-off" />
                 <span asp-validation-for="Case.PostalCode" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-5">
             <div class="form-group">
                 <label asp-for="Case.Postal.Town" class="control-label"></label>
-                <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" autocomplete="off"/>
+                <input name="Town" asp-for="Case.Postal.Town" class="form-control" id="locality" onfocus="findCity()" autocomplete="chrome-off"/>
             </div>
             <br />
         </div>
@@ -78,10 +78,10 @@
     <form id="uploadForm" enctype="multipart/form-data" asp-action="/Cases/Upload">
         <input id="routevalue" name="id" type="hidden" value="@Model.Case.CaseID" />
         <div class="row">
-            <div class="col-md-8 offset-md-2 text-md-center">
+            <div class="col-md-8 offset-md-2 text-center">
                 <hr />
-                <span class="btn btn-success fileinput-button w-75">
-                    <span>Tilføj Assets</span>
+                <span class="btn btn-success fileinput-button fas fa-upload fa-lg w-50">
+                    <span>Upload Assets</span>
                     <input id="fileupload" name="files" type="file" multiple />
                 </span>
             </div>
@@ -105,11 +105,11 @@
 }
 
 <div class="row">
-    <div class="col-md-8 offset-md-2 text-md-center">
+    <div class="col-md-8 offset-md-2 text-center">
         <hr />
-        <input class="btn btn-primary" type="submit" value="Gem" form="createForm" />
-        <a class="btn btn-primary" asp-action="Publish" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID">Udgiv</a>
-        <a class="btn btn-danger" asp-action="Delete" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID">Fortryd</a>
+        <input class="btn btn-primary fa-input-field fa-lg" type="submit" value="&#xf0c7 Gem" form="createForm" />
+        <a class="fas fa-eye fa-lg btn btn-primary" asp-action="Publish" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID"> Udgiv</a>
+        <a class="fas fa-trash-alt btn btn-primary fa-lg" asp-action="Delete" asp-controller="Cases" asp-route-caseID="@Model.Case.CaseID"> Fortryd</a>
     </div>
 </div>
 
@@ -120,7 +120,7 @@
         <thead title="Video Assets">
             <tr class="row">
                 <th class="offset-md-2 col-md-8">
-                    <label>Video Assets</label>
+                    <h4 class="fas fa-video"> Video Assets</h4>
                 </th>
             </tr>
         </thead>
@@ -129,17 +129,17 @@
             {
                 <tr class="row">
                     <td class=" offset-md-2 col-md-8">
-                        <p><span>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)</span><p>
-                        <p><span>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</span></p>
+                        <p>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)<p>
+                        <p>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</p>
                         <video class="assets-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
                         <div>
                             @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.MediaProcessing)).Succeeded)
                             {
-                                <a class="btn btn-primary" asp-action="CreateViewAutoStills" asp-controller="Cases" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.Case.CaseID">Auto Stills</a>
+                                <a class="btn btn-primary fas fa-images fa-lg" asp-action="CreateViewAutoStills" asp-controller="Cases" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.Case.CaseID"> Auto Stills</a>
                             }
                             @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.Delete)).Succeeded)
                             {
-                                <a class="btn alert-danger" asp-action="DeleteVideoAssetsCreateView" asp-controller="Cases" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseID="@videoAssets.CaseID">Slet</a>
+                                <a class="btn alert-danger fas fa-trash-alt fa-lg" asp-action="DeleteVideoAssetsCreateView" asp-controller="Cases" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseID="@videoAssets.CaseID"> Slet</a>
                             }
                         </div>
                     </td>
@@ -157,7 +157,7 @@
         <thead title="Billede Assets">
             <tr class="row">
                 <th class="offset-md-2 col-md-8">
-                    <label>Image Assets</label>
+                    <h4 class="fas fa-image"> Image Assets</h4>
                 </th>
             </tr>
         </thead>
@@ -166,15 +166,14 @@
             {
                 <tr class="row">
                     <td class="offset-md-2 col-md-8">
-                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</span></p>
-                        <p><span>@Html.DisplayFor(modelItem => imageAssets.ImageFileName)</span></p>
+                        <p>ID: @Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</p>
+                        <p>Filnavn: @Html.DisplayFor(modelItem => imageAssets.ImageFileName)</p>
 
                         <img class="assets-size img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
 
                         @if ((await AuthorizationService.AuthorizeAsync(User, Model.Case, AuthorizationOperations.IsOwner)).Succeeded)
                         {
-                            <a class="btn btn-danger" asp-action="DeleteImageAssetsCreateView" asp-controller="Cases" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseID="@imageAssets.CaseID">Slet</a>
-                            <input asp-for="@imageAssets.ImageIsPrimary" />
+                            <a class="btn btn-danger fas fa-trash-alt fa-lg" asp-action="DeleteImageAssetsCreateView" asp-controller="Cases" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseID="@imageAssets.CaseID"> Slet</a>
                         }
                     </td>
                 </tr>

@@ -139,7 +139,8 @@ namespace PhotographersVideoDist
 				{
 					options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
 					options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
-				});
+				})
+				.AddRazorRuntimeCompilation();
 
 			// Add Authorization Policies.
 			services.AddScoped<IAuthorizationHandler, IsOwnerAuthorizationHandler>();

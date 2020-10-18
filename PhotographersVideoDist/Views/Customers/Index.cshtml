@@ -1,0 +1,16 @@
+﻿@model IEnumerable<PhotographersVideoDist.Models.Case>
+
+@{
+    ViewData["Title"] = "Sags Oversigt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Titel"]</h1>
+
+
+@foreach (var item in Model)
+{
+    <a asp-action="Case" asp-controller="Customers" asp-route-caseID="@item.CaseID">
+       
+    </a>
+}

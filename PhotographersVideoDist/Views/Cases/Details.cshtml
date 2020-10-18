@@ -88,7 +88,7 @@
         <hr />
         @if ((await AuthorizationService.AuthorizeAsync(User, Model, AuthorizationOperations.Update)).Succeeded)
         {
-            <a asp-action="Edit" asp-route-id="@Model.CaseID" class="btn btn-primary">Rediger</a>
+            <a asp-action="Edit" asp-controller="Cases" asp-route-caseID="@Model.CaseID" class="btn btn-primary">Rediger</a>
             <text> | </text>
         }
         <a asp-action="Index" class="btn btn-primary">Oversigt</a>

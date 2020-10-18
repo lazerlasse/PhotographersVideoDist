@@ -88,10 +88,17 @@ namespace PhotographersVideoDist.Areas.Identity.Pages.Account
 
                     var user = await _signInManager.UserManager.FindByNameAsync(Input.UserName);
 
+					if (await _signInManager.UserManager.IsInRoleAsync(user, "Administrator"))
+					{
+                        returnUrl = Url.Content("~/Cases");
+                        return LocalRedirect(returnUrl);
+                    }
                     if (await _signInManager.UserManager.IsInRoleAsync(user, "Fotograf"))
 					{
                         returnUrl = Url.Content("~/Cases/Create");
-					}
+                        return LocalRedirect(returnUrl);
+                    }
+
 					return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
