@@ -30,9 +30,15 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Hjem</a>
                         </li>
-                        @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.Read)).Succeeded)
+                        @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.IsCustomer)).Succeeded)
                         {
-                            <li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Customers" asp-action="Index">Sags Oversigt</a>
+                            </li>
+                        }
+                        @if ((await AuthorizationService.AuthorizeAsync(User, new Case(), AuthorizationOperations.IsPhotographer)).Succeeded)
+                        {
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Cases" asp-action="Index">Sager</a>
                             </li>
                         }

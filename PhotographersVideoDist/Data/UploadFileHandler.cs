@@ -41,30 +41,34 @@ namespace PhotographersVideoDist.Data
 			// Loop through files and upload them.
 			foreach (var file in fileUpload)
 			{
-				// Try upload file and save to disk.
-				var uploaded = await Upload(file);
-
-				// Check file is uploaded.
-				if (uploaded)
+				// Check if the upload has failed validation check.
+				if (file.UploadStatus != "Filtype ikke tilladt")
 				{
-					// Check file exist.
-					if (File.Exists(Path.Combine(caseAssetsFolder, file.AssetsFile.FileName)))
-					{
-						// Save uploaded file to database.
-						var saved = SaveUploadToDb(file.AssetsFile);
+					// Try upload file and save to disk.
+					var uploaded = await Upload(file);
 
-						// If save to db failed, delete file from disk.
-						if (!saved.Result)
+					// Check file is uploaded.
+					if (uploaded)
+					{
+						// Check file exist.
+						if (File.Exists(Path.Combine(caseAssetsFolder, file.AssetsFile.FileName)))
 						{
-							if (!AssetsFileHandler.DeleteAssetsFile(file.AssetsFile.FileName, _caseID, _logger))
+							// Save uploaded file to database.
+							var saved = SaveUploadToDb(file.AssetsFile);
+
+							// If save to db failed, delete file from disk.
+							if (!saved.Result)
 							{
-								_logger.LogError("Filen blev ikke slette fra disken: " + file.AssetsFile.FileName);
-								file.UploadStatus = "Fejlet";
-							};
-						}
-						else
-						{
-							file.UploadStatus = "Uploaded";
+								if (!AssetsFileHandler.DeleteAssetsFile(file.AssetsFile.FileName, _caseID, _logger))
+								{
+									_logger.LogError("Filen blev ikke slette fra disken: " + file.AssetsFile.FileName);
+									file.UploadStatus = "Fejlet";
+								};
+							}
+							else
+							{
+								file.UploadStatus = "Uploaded";
+							}
 						}
 					}
 				}

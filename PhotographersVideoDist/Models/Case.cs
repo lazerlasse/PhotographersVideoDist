@@ -19,7 +19,7 @@ namespace PhotographersVideoDist.Models
 		[Display(Name = "Overskrift")]
 		public string Titel { get; set; }
 
-		[Display(Name = "Detaljer"), MaxLength(200)]
+		[Display(Name = "Detaljer"), MaxLength(800)]
 		public string Details { get; set; }
 
 		[Display(Name = "Kommentar/Bemærkninger")]
@@ -53,7 +53,7 @@ namespace PhotographersVideoDist.Models
 
 		// Navigation Properties for ImageAssets.
 		[Display(Name = "Billeder")]
-		public ICollection<ImageAssets> ImageAssets { get; set; }	// Collection of ImageAssets - one to many.
+		public ICollection<ImageAssets> ImageAssets { get; set; }  // Collection of ImageAssets - one to many.
 
 
 		// Navigation Properties for VideoAssets.

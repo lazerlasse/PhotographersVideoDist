@@ -1,16 +1,60 @@
-﻿@model IEnumerable<PhotographersVideoDist.Models.Case>
+﻿@model PaginatedList<PhotographersVideoDist.Models.Case>
 
 @{
     ViewData["Title"] = "Sags Oversigt";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>@ViewData["Titel"]</h1>
+<h2>@ViewData["Titel"]</h2>
 
 
 @foreach (var item in Model)
 {
-    <a asp-action="Case" asp-controller="Customers" asp-route-caseID="@item.CaseID">
-       
-    </a>
+    <div class="row mb-3">
+        <div class="col-md-8 offset-md-2">
+            <article class="article">
+                <a asp-action="Case" asp-controller="Customers" asp-route-caseID="@item.CaseID">
+                    <h1 class="p-2">@item.Titel</h1>
+                </a>
+                <div class="p-2">
+                    <a asp-action="Case" asp-controller="Customers" asp-route-caseID="@item.CaseID">
+                        @if (item.ImageAssets.Any())
+                        {
+                            <img class="assets-size" src="/Cases/@item.CaseID/@item.ImageAssets.FirstOrDefault().ImageFileName" />
+                        }
+                        else
+                        {
+                            <img class="assets-size" src="/Images/foto-mangler.jpg" />
+                        }
+                    </a>
+                </div>
+                <a asp-action="Case" asp-controller="Customers" asp-route-caseID="@item.CaseID">
+                    <p class="pl-2 pr-2 pt-1">@item.Details</p>
+                </a>
+                <footer>
+                    <hr />
+                    <p class="pl-2 pb-2 font-weight-bold"><time datetime="@item.Published">@item.Published</time> - Fotograf. @Html.DisplayFor(modelItem => item.Photographer.UserName)</p>
+                </footer>
+            </article>
+        </div>
+    </div>
 }
+
+
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-controller="Cases"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   class="btn btn-primary @prevDisabled">
+    <i class="fas fa-arrow-left fa-lg"></i> Forrige
+</a>
+<a asp-action="Index"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-controller="Cases"
+   class="btn btn-primary @nextDisabled">
+    Næste <i class="fas fa-arrow-right fa-lg"></i>
+</a>

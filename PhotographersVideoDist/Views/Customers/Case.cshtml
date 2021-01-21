@@ -1,73 +1,85 @@
 ﻿@model PhotographersVideoDist.Models.Case
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Vis sag";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<div>
+    <h4>Sags nr: @Model.CaseID</h4>
+    <hr />
+
+</div>
+
+@if (Model.VideoAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Video Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <h4 class="fas fa-video"> Video Assets</h4>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var videoAssets in Model.VideoAssets)
+            {
+                <tr class="row">
+                    <td class=" offset-md-2 col-md-8">
+                        <p>ID: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsID)<p>
+                        <p>Filnavn: @Html.DisplayFor(modelItem => videoAssets.VideoAssetsFileName)</p>
+                        <video class="assets-size" src="/Cases/@videoAssets.CaseID/@videoAssets.VideoAssetsFileName" controls type="video/mp4" preload="metadata"></video>
+                        <div>
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model, AuthorizationOperations.MediaProcessing)).Succeeded)
+                            {
+                                <a class="btn btn-primary fas fa-images fa-lg" asp-action="CreateViewAutoStills" asp-controller="Cases" asp-route-videoFileName="@videoAssets.VideoAssetsFileName" asp-route-assetsFolderID="@Model.CaseID"> Auto Stills</a>
+                            }
+                            @if ((await AuthorizationService.AuthorizeAsync(User, Model, AuthorizationOperations.Delete)).Succeeded)
+                            {
+                                <a class="btn alert-danger fas fa-trash-alt fa-lg" asp-action="DeleteVideoAssetsCreateView" asp-controller="Cases" asp-route-id="@videoAssets.VideoAssetsID" asp-route-caseID="@videoAssets.CaseID"> Slet</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@if (Model.ImageAssets.Any())
+{
+    <hr />
+    <table class="table">
+        <thead title="Billede Assets">
+            <tr class="row">
+                <th class="offset-md-2 col-md-8">
+                    <h4 class="fas fa-image"> Image Assets</h4>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var imageAssets in Model.ImageAssets)
+            {
+                <tr class="row">
+                    <td class="offset-md-2 col-md-8">
+                        <p>ID: @Html.DisplayFor(modelItem => imageAssets.ImageAssetsID)</p>
+                        <p>Filnavn: @Html.DisplayFor(modelItem => imageAssets.ImageFileName)</p>
+
+                        <img class="assets-size img-thumbnail" src="/Cases/@imageAssets.CaseID/@imageAssets.ImageFileName" />
+
+                        @if ((await AuthorizationService.AuthorizeAsync(User, Model, AuthorizationOperations.IsOwner)).Succeeded)
+                        {
+                            <a class="btn btn-danger fas fa-trash-alt fa-lg" asp-action="DeleteImageAssetsCreateView" asp-controller="Cases" asp-route-id="@imageAssets.ImageAssetsID" asp-route-caseID="@imageAssets.CaseID"> Slet</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 <div>
-    <h4>Case</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsPublished)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsPublished)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Titel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Titel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Details)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Details)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Comments)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Comments)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Street)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Street)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Postal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Postal.PostalCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Published)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Published)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Photographer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Photographer.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.CaseID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a class="btn btn-primary fas fa-list-alt fa-lg" asp-action="Index"> Sags oversigt</a>
 </div>
