@@ -70,7 +70,7 @@ namespace PhotographersVideoDist
 			SqlConnectionStringBuilder MySqlconnection = new SqlConnectionStringBuilder(
 			Configuration.GetConnectionString("PVD_db_Connection"))
 			{
-				Password = Environment.GetEnvironmentVariable("DbPWD")
+				Password = Configuration.GetValue<string>("DbPWD")
 			};
 
 			// Set the dbcontext sql connection settings...

@@ -32,7 +32,7 @@ namespace PhotographersVideoDist
 				config.GetConnectionString("PVD_db_Connection"))
 				{
 					// Set Passwords in system/Enviroment varibles.
-					Password = Environment.GetEnvironmentVariable("DbPWD")
+					Password = config.GetValue<string>("DbPWD")
 				};
 
 				// Seed Postal data.
@@ -41,7 +41,7 @@ namespace PhotographersVideoDist
 				try
 				{
 					// Set Passwords in system/Enviroment varibles.
-					SeedUsersAndRoles.SeedData(services, Environment.GetEnvironmentVariable("SeedUserPWD")).Wait();
+					SeedUsersAndRoles.SeedData(services, config.GetValue<string>("SeedUserPWD")).Wait();
 				}
 				catch (Exception ex)
 				{
@@ -55,6 +55,10 @@ namespace PhotographersVideoDist
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 			WebHost.CreateDefaultBuilder(args)
+				.ConfigureAppConfiguration((hostingContext, config) =>
+				{
+					config.AddEnvironmentVariables(prefix: "MySpecialSettings_");
+				})
 				.UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
 				.UseStartup<Startup>()
 				.ConfigureLogging(logging =>
